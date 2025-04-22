@@ -1,6 +1,8 @@
 # Ignore the InfluxDB configuration file containing sensitive credentials
 influxdb_config.json
 influxExport.py
+# Ignore dataset files .csv
+*.csv
 
 # Python bytecode
 __pycache__/

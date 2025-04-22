@@ -107,9 +107,9 @@ def export_data_from_influxdb():
             
         print(f"✅ Data retrieved. Shape: {df.shape}")
         
-        # Export to CSV
+        # Export to CSV - Include the number of days in the filename
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{device.lower()}_data_{timestamp}.csv"
+        filename = f"{device.lower()}_data_{days}d_{timestamp}.csv"
         df.to_csv(filename, index=False)
         print(f"💾 Data exported to {filename}")
         
