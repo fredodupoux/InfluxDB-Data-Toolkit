@@ -2,10 +2,10 @@ import os
 import datetime
 import subprocess
 
-# Import functionality from separate modules with updated paths
-from tools.exporter import export_data_from_influxdb
-from tools.cleaner import clean_data_for_ml
-from tools.time_utils import reformat_timestamps
+# Import functionality from separate modules (excluding ML)
+from exporter import export_data_from_influxdb
+from cleaner import clean_data_for_ml
+from time_utils import reformat_timestamps
 
 def clear_screen():
     """Clear the terminal screen based on operating system"""
@@ -27,10 +27,9 @@ def display_menu():
     print("2️⃣ Clean existing CSV data for machine learning")
     print("3️⃣ Reformat timestamps and adjust timezone")
     print("4️⃣ Launch ML preparation tool (separate process)")
-    print("5️⃣ Label water consumption events")
-    print("6️⃣ Exit program")
+    print("5️⃣ Exit program")
     print("\n💡 Type 'cancel' at any prompt to return to this menu")
-    return input("\n🔍 Enter your choice (1-6): ")
+    return input("\n🔍 Enter your choice (1-5): ")
 
 def launch_ml_tool(csv_file=None):
     """
@@ -44,7 +43,7 @@ def launch_ml_tool(csv_file=None):
     print("🚀 Launching ML preparation tool in a separate process...")
     try:
         # Prepare the command with or without a file argument
-        command = ["python", "ml/ml_toolkit.py"]  # Updated path to ml_toolkit.py
+        command = ["python", "ml_toolkit.py"]
         if csv_file:
             command.append(csv_file)
             print(f"📄 Passing {csv_file} to the ML toolkit")
@@ -57,23 +56,6 @@ def launch_ml_tool(csv_file=None):
         print("\n✅ Returned from ML preparation toolkit.")
     except Exception as e:
         print(f"❌ Failed to launch ML tool: {str(e)}")
-
-def launch_event_labeler():
-    """
-    Launch the water event labeling tool as a separate process
-    """
-    print("🚀 Launching water event labeler in a separate process...")
-    try:
-        # Launch the event labeler script
-        print("✅ Event labeler launched. Please complete your labeling tasks.")
-        print("⏳ The main toolkit will resume after you exit the labeler.")
-        result = os.system("python tools/run_event_labeler.py")
-        if result != 0:
-            print("❌ Event labeler module is not available.")
-        else:
-            print("\n✅ Returned from water event labeler.")
-    except Exception as e:
-        print(f"❌ Failed to launch event labeler: {str(e)}")
 
 def main():
     """Main entry point for the application"""
@@ -150,11 +132,6 @@ def main():
             launch_ml_tool()
         
         elif choice == "5":
-            clear_screen()
-            # Launch Event Labeler
-            launch_event_labeler()
-        
-        elif choice == "6":
             # Exit program
             clear_screen()
             print("👋 Thank you for using InfluxDB Data Toolkit. Goodbye!")

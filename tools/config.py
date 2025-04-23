@@ -2,7 +2,7 @@ import os
 import json
 
 # Configuration file path
-CONFIG_FILE = "influxdb_config.json"
+CONFIG_FILE = os.path.join("config", "influxdb_config.json")
 
 def clear_screen():
     """Clear the terminal screen based on operating system"""

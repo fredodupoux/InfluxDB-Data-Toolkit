@@ -1,6 +1,7 @@
 # Ignore the InfluxDB configuration file containing sensitive credentials
 influxdb_config.json
-influxExport.py
+config/influxdb_config.json
+
 # Ignore dataset files .csv
 *.csv
 
@@ -23,6 +24,7 @@ build/
 # macOS system files
 .DS_Store
 .png
+
 # Editor directories and files
 .idea/
 .vscode/

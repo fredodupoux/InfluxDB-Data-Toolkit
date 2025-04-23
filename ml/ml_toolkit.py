@@ -16,6 +16,14 @@ print("\n🔄 Loading ML libraries. This may take a moment...")
 # Import the ML preparation functionality
 from ml_prep import prepare_data_for_ml
 
+# Import the event labeler functionality
+try:
+    from event_labeler import main as event_labeler_main
+    HAS_EVENT_LABELER = True
+except ImportError:
+    print("⚠️ Event labeler module not found. Some features will be disabled.")
+    HAS_EVENT_LABELER = False
+
 def display_ml_menu():
     """Display the ML toolkit menu options"""
     print("\n" + "="*60)
@@ -23,8 +31,9 @@ def display_ml_menu():
     print("="*60)
     print("🔽 Select an option:")
     print("1️⃣ Prepare data for machine learning")
-    print("2️⃣ Exit ML toolkit")
-    return input("\n🔍 Enter your choice (1-2): ")
+    print("2️⃣ Label water consumption events")
+    print("3️⃣ Exit ML toolkit")
+    return input("\n🔍 Enter your choice (1-3): ")
 
 def main():
     """Main entry point for the ML toolkit application"""
@@ -33,7 +42,7 @@ def main():
     print("🌟 Welcome to the Machine Learning Preparation Toolkit 🌟".center(60))
     print("="*60)
     print("This tool helps prepare your time series data for machine learning applications.")
-    print("You can perform feature engineering, normalization, anomaly detection, and more.")
+    print("You can perform feature engineering, normalization, event labeling, and more.")
     
     # Check for any command line arguments for CSV file
     initial_file = None
@@ -70,6 +79,17 @@ def main():
             input("\n⏸️ Press Enter to continue...")
         
         elif choice == "2":
+            # Launch event labeler
+            if HAS_EVENT_LABELER:
+                print("\n📊 Launching Water Event Labeler...")
+                # Save and restore terminal state since the event labeler uses clear_screen()
+                event_labeler_main()
+            else:
+                print("❌ Event labeler module is not available.")
+                print("Please make sure the event_labeler directory is in your project.")
+                input("\n⏸️ Press Enter to continue...")
+        
+        elif choice == "3":
             # Exit program
             print("👋 Thank you for using the ML Preparation Toolkit. Goodbye!")
             running = False

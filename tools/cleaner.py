@@ -28,11 +28,20 @@ def clean_data_for_ml(csv_file=None):
     """
     if csv_file is None:
         clear_screen()
-        # Get list of CSV files in the current directory
-        csv_files = [f for f in os.listdir() if f.endswith('.csv')]
+        # Get list of CSV files in both current directory and _data directory
+        root_csv_files = [f for f in os.listdir() if f.endswith('.csv')]
+        
+        # Check if _data directory exists
+        data_dir = "_data"
+        data_csv_files = []
+        if os.path.exists(data_dir) and os.path.isdir(data_dir):
+            data_csv_files = [os.path.join(data_dir, f) for f in os.listdir(data_dir) if f.endswith('.csv')]
+        
+        # Combine both lists
+        csv_files = root_csv_files + data_csv_files
         
         if not csv_files:
-            print("❌ No CSV files found in the current directory.")
+            print("❌ No CSV files found in the current directory or _data folder.")
             return None
         
         # Let user select a file
@@ -235,7 +244,14 @@ def clean_data_for_ml(csv_file=None):
             elif choice == 6:
                 # Save and exit
                 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-                output_filename = f"{os.path.splitext(csv_file)[0]}_clean.csv"
+                data_dir = "_data"
+                # Create the _data directory if it doesn't exist
+                if not os.path.exists(data_dir):
+                    os.makedirs(data_dir)
+                
+                # Get basename of the file without path
+                base_filename = os.path.basename(csv_file)
+                output_filename = os.path.join(data_dir, f"{os.path.splitext(base_filename)[0]}_clean.csv")
                 df.to_csv(output_filename, index=False)
                 clear_screen()
                 print(f"💾 Cleaned data saved to {output_filename}")

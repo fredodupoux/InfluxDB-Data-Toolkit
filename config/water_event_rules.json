@@ -1,0 +1,65 @@
+[
+  {
+    "label": "shower",
+    "conditions": [
+      {
+        "column": "eventLength",
+        "operator": ">",
+        "value": 180.0
+      },
+      {
+        "column": "eventVolume",
+        "operator": ">",
+        "value": 4.0
+      }
+    ],
+    "description": "Shower-Rule"
+  },
+  {
+    "label": "toilet",
+    "conditions": [
+      {
+        "column": "eventLength",
+        "operator": ">=",
+        "value": 25.0
+      },
+      {
+        "column": "eventVolume",
+        "operator": ">=",
+        "value": 1.2
+      },
+      {
+        "column": "eventLength",
+        "operator": "<=",
+        "value": 60.0
+      },
+      {
+        "column": "eventVolume",
+        "operator": "<=",
+        "value": 1.9
+      }
+    ],
+    "description": "WC-Flush"
+  },
+  {
+    "label": "other",
+    "conditions": [
+      {
+        "column": "maxFlowRate",
+        "operator": ">=",
+        "value": 3.0
+      },
+      {
+        "column": "avgFlowRate",
+        "operator": ">=",
+        "value": 2.8
+      },
+      {
+        "column": "eventVolume",
+        "operator": ">=",
+        "value": 2.0
+      }
+    ],
+    "description": "Bath Tub"
+  }
+]

@@ -31,11 +31,20 @@ def reformat_timestamps(csv_file=None, target_timezone='America/New_York'):
     """
     if csv_file is None:
         clear_screen()
-        # Get list of CSV files in the current directory
-        csv_files = [f for f in os.listdir() if f.endswith('.csv')]
+        # Get list of CSV files in both current directory and _data directory
+        root_csv_files = [f for f in os.listdir() if f.endswith('.csv')]
+        
+        # Check if _data directory exists
+        data_dir = "_data"
+        data_csv_files = []
+        if os.path.exists(data_dir) and os.path.isdir(data_dir):
+            data_csv_files = [os.path.join(data_dir, f) for f in os.listdir(data_dir) if f.endswith('.csv')]
+        
+        # Combine both lists
+        csv_files = root_csv_files + data_csv_files
         
         if not csv_files:
-            print("❌ No CSV files found in the current directory.")
+            print("❌ No CSV files found in the current directory or _data folder.")
             return None
             
         # Let user select a file
@@ -128,14 +137,23 @@ def reformat_timestamps(csv_file=None, target_timezone='America/New_York'):
         df['_time'] = df['_time'].dt.strftime('%Y-%m-%d %H:%M:%S')
     
     # Create output filename with appropriate suffix
+    data_dir = "_data"
+    # Create the _data directory if it doesn't exist
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+    
+    # Get basename of the file without path
+    base_filename = os.path.basename(csv_file)
+    base_name = os.path.splitext(base_filename)[0]
+    
     if convert_timezone and keep_time_only:
-        output_filename = f"{os.path.splitext(csv_file)[0]}_time_only_tz.csv"
+        output_filename = os.path.join(data_dir, f"{base_name}_time_only_tz.csv")
     elif keep_time_only:
-        output_filename = f"{os.path.splitext(csv_file)[0]}_time_only.csv"
+        output_filename = os.path.join(data_dir, f"{base_name}_time_only.csv")
     elif convert_timezone:
-        output_filename = f"{os.path.splitext(csv_file)[0]}_tz_converted.csv"
+        output_filename = os.path.join(data_dir, f"{base_name}_tz_converted.csv")
     else:
-        output_filename = f"{os.path.splitext(csv_file)[0]}_reformatted.csv"
+        output_filename = os.path.join(data_dir, f"{base_name}_reformatted.csv")
     
     # Save to new CSV file
     df.to_csv(output_filename, index=False)
