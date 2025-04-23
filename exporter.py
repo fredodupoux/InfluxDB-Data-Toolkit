@@ -1,6 +1,16 @@
 import pandas as pd
 import datetime
 from config import load_influxdb_config
+import os
+
+def clear_screen():
+    """Clear the terminal screen based on operating system"""
+    # For macOS and Linux
+    if os.name == 'posix':
+        os.system('clear')
+    # For Windows
+    elif os.name == 'nt':
+        os.system('cls')
 
 def export_data_from_influxdb():
     """
@@ -11,9 +21,15 @@ def export_data_from_influxdb():
     str
         Path to the exported CSV file, or None if cancelled
     """
+    clear_screen()
     # Load InfluxDB configuration from file or user input
     config = load_influxdb_config()
     
+    # If config is empty, user cancelled
+    if not config:
+        return None
+    
+    clear_screen()
     # Query options
     print("\n📊 Query options:")
     print("1. Continue with query parameters")
@@ -33,6 +49,7 @@ def export_data_from_influxdb():
         return None
     device = device or "WaterMeter"
     
+    clear_screen()
     # Updated query with user parameters
     query = f'''
     from(bucket: "{config['bucket']}")
@@ -72,8 +89,10 @@ def export_data_from_influxdb():
         # Sort by timestamp
         if '_time' in df.columns:
             df = df.sort_values('_time')
-            
+        
+        clear_screen()    
         print(f"✅ Data retrieved. Shape: {df.shape}")
+        print(f"📊 Columns: {', '.join(df.columns)}")
         
         # Export to CSV - Include the number of days in the filename
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -85,10 +104,13 @@ def export_data_from_influxdb():
         print("\n👀 Preview of exported data (first 5 rows):")
         print(df.head().to_string())
         
+        input("\nPress Enter to continue...")
+        
         return filename
         
     except Exception as e:
         print(f"⚠️ Error: {str(e)}")
+        input("\nPress Enter to continue...")
         return None
     finally:
         client.close()

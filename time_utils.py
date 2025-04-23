@@ -3,6 +3,15 @@ import os
 import datetime
 import pytz
 
+def clear_screen():
+    """Clear the terminal screen based on operating system"""
+    # For macOS and Linux
+    if os.name == 'posix':
+        os.system('clear')
+    # For Windows
+    elif os.name == 'nt':
+        os.system('cls')
+
 def reformat_timestamps(csv_file=None, target_timezone='America/New_York'):
     """
     Reformat timestamps in a CSV file from universal timezone to YYYY-MM-DD HH:MM:SS format
@@ -21,6 +30,7 @@ def reformat_timestamps(csv_file=None, target_timezone='America/New_York'):
         Path to the newly created CSV file with reformatted timestamps
     """
     if csv_file is None:
+        clear_screen()
         # Get list of CSV files in the current directory
         csv_files = [f for f in os.listdir() if f.endswith('.csv')]
         
@@ -49,6 +59,7 @@ def reformat_timestamps(csv_file=None, target_timezone='America/New_York'):
             except ValueError:
                 print("❌ Please enter a valid number.")
     
+    clear_screen()
     print(f"📂 Reading {csv_file}...")
     df = pd.read_csv(csv_file)
     
@@ -76,6 +87,7 @@ def reformat_timestamps(csv_file=None, target_timezone='America/New_York'):
     keep_time_only = False
     
     if format_choice == '1' or format_choice == '3':
+        clear_screen()
         convert_timezone = True
         print("\n🌍 Common timezones: America/New_York, America/Chicago, America/Denver, America/Los_Angeles, Europe/London")
         user_tz = input("🕒 Enter target timezone (default: America/New_York): ").strip()
@@ -87,9 +99,14 @@ def reformat_timestamps(csv_file=None, target_timezone='America/New_York'):
     if format_choice == '2' or format_choice == '3':
         keep_time_only = True
     
+    clear_screen()
+    
     if '_time' not in df.columns:
         print("❌ Error: No '_time' column found in the CSV file.")
+        input("\nPress Enter to continue...")
         return None
+    
+    print(f"🔄 Processing timestamps in {csv_file}...")
     
     # First make sure timestamps are parsed as datetime objects
     df['_time'] = pd.to_datetime(df['_time'])
@@ -127,5 +144,7 @@ def reformat_timestamps(csv_file=None, target_timezone='America/New_York'):
     # Display first 5 rows of the data
     print("\n👀 Preview of reformatted data (first 5 rows):")
     print(df.head().to_string())
+    
+    input("\nPress Enter to continue...")
     
     return output_filename

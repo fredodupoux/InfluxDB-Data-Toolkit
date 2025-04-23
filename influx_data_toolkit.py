@@ -7,8 +7,18 @@ from exporter import export_data_from_influxdb
 from cleaner import clean_data_for_ml
 from time_utils import reformat_timestamps
 
+def clear_screen():
+    """Clear the terminal screen based on operating system"""
+    # For macOS and Linux
+    if os.name == 'posix':
+        os.system('clear')
+    # For Windows
+    elif os.name == 'nt':
+        os.system('cls')
+
 def display_menu():
     """Display the main menu options"""
+    clear_screen()
     print("\n" + "="*60)
     print("🌟 InfluxDB Data Toolkit 🌟".center(60))
     print("="*60)
@@ -59,6 +69,7 @@ def main():
             continue
         
         if choice == "1":
+            clear_screen()
             # Export data from InfluxDB
             exported_file = export_data_from_influxdb()
             if exported_file:
@@ -75,19 +86,24 @@ def main():
                 if next_step.lower() == "cancel" or next_step == "0":
                     continue
                 elif next_step == "1":
+                    clear_screen()
                     clean_data_for_ml(exported_file)
                 elif next_step == "2":
+                    clear_screen()
                     reformatted_file = reformat_timestamps(exported_file)
                     if reformatted_file:
                         ml_choice = input("\n🔄 Would you like to launch the ML preparation tool with this file? (y/n): ").lower()
                         if ml_choice == "cancel":
                             continue
                         elif ml_choice == 'y':
+                            clear_screen()
                             launch_ml_tool(reformatted_file)
                 elif next_step == "3":
+                    clear_screen()
                     launch_ml_tool(exported_file)
         
         elif choice == "2":
+            clear_screen()
             # Clean existing CSV data
             cleaned_file = clean_data_for_ml()
             if cleaned_file:
@@ -95,9 +111,11 @@ def main():
                 if ml_choice == "cancel":
                     continue
                 elif ml_choice == 'y':
+                    clear_screen()
                     launch_ml_tool(cleaned_file)
         
         elif choice == "3":
+            clear_screen()
             # Reformat timestamps
             reformatted_file = reformat_timestamps()
             if reformatted_file:
@@ -105,19 +123,23 @@ def main():
                 if ml_choice == "cancel":
                     continue
                 elif ml_choice == 'y':
+                    clear_screen()
                     launch_ml_tool(reformatted_file)
         
         elif choice == "4":
+            clear_screen()
             # Launch ML preparation tool
             launch_ml_tool()
         
         elif choice == "5":
             # Exit program
+            clear_screen()
             print("👋 Thank you for using InfluxDB Data Toolkit. Goodbye!")
             running = False
         
         else:
             print("❌ Invalid choice. Please try again.")
+            input("\nPress Enter to continue...")
 
 if __name__ == "__main__":
     main()

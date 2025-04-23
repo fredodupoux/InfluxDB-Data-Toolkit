@@ -4,6 +4,15 @@ import json
 # Configuration file path
 CONFIG_FILE = "influxdb_config.json"
 
+def clear_screen():
+    """Clear the terminal screen based on operating system"""
+    # For macOS and Linux
+    if os.name == 'posix':
+        os.system('clear')
+    # For Windows
+    elif os.name == 'nt':
+        os.system('cls')
+
 def load_influxdb_config():
     """
     Load InfluxDB configuration from the config file or prompt the user for input.
@@ -14,6 +23,7 @@ def load_influxdb_config():
         Dictionary containing InfluxDB configuration (url, token, org, bucket)
         Returns empty dict if user cancels
     """
+    clear_screen()
     # Check if configuration file exists
     if os.path.exists(CONFIG_FILE):
         try:
@@ -62,4 +72,5 @@ def load_influxdb_config():
     except Exception as e:
         print(f"⚠️ Failed to save configuration: {str(e)}")
     
+    input("\nPress Enter to continue...")
     return config

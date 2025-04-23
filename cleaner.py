@@ -2,6 +2,15 @@ import pandas as pd
 import os
 import datetime
 
+def clear_screen():
+    """Clear the terminal screen based on operating system"""
+    # For macOS and Linux
+    if os.name == 'posix':
+        os.system('clear')
+    # For Windows
+    elif os.name == 'nt':
+        os.system('cls')
+
 def clean_data_for_ml(csv_file=None):
     """
     Interactive function to clean and prepare CSV data for a machine learning model.
@@ -18,6 +27,7 @@ def clean_data_for_ml(csv_file=None):
         Path to the cleaned CSV file or None if operation was canceled
     """
     if csv_file is None:
+        clear_screen()
         # Get list of CSV files in the current directory
         csv_files = [f for f in os.listdir() if f.endswith('.csv')]
         
@@ -48,6 +58,7 @@ def clean_data_for_ml(csv_file=None):
                 print("❌ Please enter a valid number.")
     
     # Load the CSV file
+    clear_screen()
     print(f"⏳ Loading {csv_file}...")
     df = pd.read_csv(csv_file)
     
@@ -80,6 +91,7 @@ def clean_data_for_ml(csv_file=None):
             choice = int(choice_input)
             
             if choice == 1:
+                clear_screen()
                 # Remove a column
                 print(f"\n📋 Available columns: {', '.join(df.columns)}")
                 col = input("🗑️ Enter the column name to remove : ")
@@ -92,6 +104,7 @@ def clean_data_for_ml(csv_file=None):
                     print(f"❌ Column '{col}' not found.")
             
             elif choice == 2:
+                clear_screen()
                 # Filter values in a column
                 print(f"\n📋 Available columns: {', '.join(df.columns)}")
                 col = input("🔍 Enter column name to filter : ")
@@ -138,6 +151,7 @@ def clean_data_for_ml(csv_file=None):
                     print(f"❌ Column '{col}' not found.")
                     
             elif choice == 3:
+                clear_screen()
                 # Rename column(s)
                 print(f"\n📋 Current columns: {', '.join(df.columns)}")
                 
@@ -205,29 +219,40 @@ def clean_data_for_ml(csv_file=None):
                 print(f"\n📋 Updated columns: {', '.join(df.columns)}")
             
             elif choice == 4:
+                clear_screen()
                 # Show summary statistics
                 print("\n📊 Summary Statistics:")
                 print(df.describe())
+                input("\nPress Enter to continue...")
                 
             elif choice == 5:
+                clear_screen()
                 # Show first 5 rows
                 print("\n👀 First 5 rows:")
                 print(df.head().to_string())
+                input("\nPress Enter to continue...")
                 
             elif choice == 6:
                 # Save and exit
                 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
                 output_filename = f"{os.path.splitext(csv_file)[0]}_clean.csv"
                 df.to_csv(output_filename, index=False)
+                clear_screen()
                 print(f"💾 Cleaned data saved to {output_filename}")
                 cleaned = True
             
             else:
                 print("❌ Invalid choice. Please try again.")
+                input("\nPress Enter to continue...")
+                clear_screen()
                 
         except ValueError:
             print("❌ Please enter a valid number.")
+            input("\nPress Enter to continue...")
+            clear_screen()
         except Exception as e:
             print(f"⚠️ An error occurred: {str(e)}")
+            input("\nPress Enter to continue...")
+            clear_screen()
     
     return output_filename
