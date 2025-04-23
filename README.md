@@ -9,12 +9,7 @@ A comprehensive Python toolkit for exporting, cleaning, processing, and preparin
 - 🕒 **Reformat Timestamps**: Convert timestamps to different timezones and formats, with options to keep only time components
 - 📊 **Data Visualization**: Preview data and statistics directly in the console
 - 🔒 **Secure Credentials**: Store InfluxDB credentials securely, protected from Git
-- 🧠 **ML Preparation**: Advanced machine learning data preparation tools including:
-  - Feature engineering and extraction
-  - Anomaly detection
-  - Data visualization for ML features
-  - Feature distribution analysis
-  - Data normalization and scaling
+- 🏷️ **Event Labeling**: Interactive event labeling system for past water consumption data
 
 ## Requirements
 
@@ -47,7 +42,7 @@ The interactive menu will guide you through the available options:
 1. Export data from InfluxDB
 2. Clean existing CSV data for machine learning
 3. Reformat timestamps and adjust timezone
-4. Launch ML preparation tool
+4. Launch event labeler tool
 5. Exit program
 
 ## Data Cleaning Features
@@ -67,20 +62,19 @@ The timestamp formatter now supports multiple operations:
 - Combine both operations at once
 - Clear naming convention for processed files (_time_only, _tz_converted, etc.)
 
-## ML Preparation Tool
+## Event Labeler Tool
 
-The ML preparation tool provides specialized functionality for preparing time series data for machine learning:
+The event labeler tool provides an interactive interface for labeling water consumption events in your time series data:
 
 ```bash
-python ml_toolkit.py [optional_csv_file]
+python event_labeler_launcher.py [optional_csv_file]
 ```
 
 Features include:
-- Feature extraction from time series data
-- Statistical analysis and visualization of features
-- Anomaly detection using various algorithms
-- Data normalization and scaling options
-- Export of ML-ready datasets
+- Interactive visualization of water consumption data
+- Configurable rules for event detection
+- Manual labeling of water consumption events
+- Export of labeled datasets for further analysis in Google Colab
 
 ## Example Workflow
 
@@ -88,8 +82,8 @@ Features include:
 2. Preview the exported data
 3. Reformat timestamps to your local timezone
 4. Clean the data by removing unnecessary columns or filtering values
-5. Use the ML preparation tool to engineer features and analyze the data
-6. Export prepared data for use with machine learning models
+5. Use the event labeler to identify and label water consumption events
+6. Export labeled data for use with machine learning models in Google Colab
 
 ## License
 
