@@ -62,12 +62,13 @@ def clean_data_for_ml(csv_file=None):
         print("\n🧹 --- Data Cleaning Options ---")
         print("1️⃣ Remove a column")
         print("2️⃣ Filter values in a column")
-        print("3️⃣ Show summary statistics")
-        print("4️⃣ Show first 5 rows")
-        print("5️⃣ Save and exit")
+        print("3️⃣ Rename column(s)")
+        print("4️⃣ Show summary statistics")
+        print("5️⃣ Show first 5 rows")
+        print("6️⃣ Save and exit")
         print("0️⃣ 🔙 Return to main menu")
         
-        choice_input = input("\n🔍 Enter your choice (0-5): ")
+        choice_input = input("\n🔍 Enter your choice (0-6): ")
         if choice_input.lower() == 'cancel' or choice_input == "0":
             return None
             
@@ -133,16 +134,83 @@ def clean_data_for_ml(csv_file=None):
                     print(f"❌ Column '{col}' not found.")
             
             elif choice == 3:
+                # Rename column(s)
+                print(f"\n📋 Current columns: {', '.join(df.columns)}")
+                
+                # Ask user how they want to rename columns
+                rename_option = input("🔄 Select an option: (1) Rename a single column, (2) Rename multiple columns : ")
+                if rename_option.lower() == 'cancel':
+                    continue
+                
+                if rename_option == '1':
+                    # Rename a single column
+                    old_col = input("🏷️ Enter the current column name : ")
+                    if old_col.lower() == 'cancel':
+                        continue
+                    
+                    if old_col not in df.columns:
+                        print(f"❌ Column '{old_col}' not found.")
+                        continue
+                    
+                    new_col = input(f"🔤 Enter new name for column '{old_col}' : ")
+                    if new_col.lower() == 'cancel':
+                        continue
+                    
+                    # Rename the column
+                    df = df.rename(columns={old_col: new_col})
+                    print(f"✅ Column '{old_col}' renamed to '{new_col}'")
+                    
+                elif rename_option == '2':
+                    # Rename multiple columns
+                    print("\n📋 Enter pairs of current and new column names (one pair per line)")
+                    print("📝 Format: currentName,newName (type 'done' when finished)")
+                    
+                    rename_dict = {}
+                    while True:
+                        pair = input("🔄 Column pair (or 'done' to finish): ")
+                        if pair.lower() == 'cancel':
+                            break
+                        elif pair.lower() == 'done':
+                            break
+                        
+                        try:
+                            old_col, new_col = pair.split(',')
+                            old_col = old_col.strip()
+                            new_col = new_col.strip()
+                            
+                            if old_col not in df.columns:
+                                print(f"❌ Column '{old_col}' not found. Skipping.")
+                                continue
+                                
+                            rename_dict[old_col] = new_col
+                            print(f"✓ Will rename '{old_col}' to '{new_col}'")
+                        except ValueError:
+                            print("❌ Invalid format. Please use: currentName,newName")
+                    
+                    if rename_dict:
+                        # Apply all renamings at once
+                        df = df.rename(columns=rename_dict)
+                        print(f"✅ Renamed {len(rename_dict)} column(s).")
+                    else:
+                        print("ℹ️ No columns were renamed.")
+                
+                else:
+                    print("❌ Invalid option.")
+                
+                # Show updated columns
+                print(f"\n📋 Updated columns: {', '.join(df.columns)}")
+            
+            elif choice == 4:
                 # Show summary statistics
                 print("\n📊 Summary Statistics:")
                 print(df.describe())
                 
-            elif choice == 4:
+            elif choice == 5:
                 # Show first 5 rows
                 print("\n👀 First 5 rows:")
                 print(df.head().to_string())
                 
-            elif choice == 5:
+            elif choice == 6:
                 # Save and exit
                 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
                 output_filename = f"{os.path.splitext(csv_file)[0]}_clean.csv"
