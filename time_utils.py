@@ -49,11 +49,32 @@ def reformat_timestamps(csv_file=None, target_timezone='America/New_York'):
             except ValueError:
                 print("❌ Please enter a valid number.")
         
-        # Ask for target timezone
-        print("\n🌍 Common timezones: America/New_York, America/Chicago, America/Denver, America/Los_Angeles, Europe/London")
-        user_tz = input("🕒 Enter target timezone (default: America/New_York): ").strip()
-        if user_tz.lower() == 'cancel':
+        # Show timestamp format options menu
+        print("\n🕰️ Timestamp Format Options:")
+        print("1. Convert timezone")
+        print("2. Remove date (keep only time)")
+        print("3. Both convert timezone and remove date")
+        print("0. 🔙 Go back")
+        
+        format_choice = input("\n🔢 Select an option (0-3): ")
+        if format_choice.lower() == 'cancel' or format_choice == '0':
             return None
+            
+        # Initialize formatting options
+        convert_timezone = False
+        keep_time_only = False
+        
+        if format_choice == '1' or format_choice == '3':
+            convert_timezone = True
+            print("\n🌍 Common timezones: America/New_York, America/Chicago, America/Denver, America/Los_Angeles, Europe/London")
+            user_tz = input("🕒 Enter target timezone (default: America/New_York): ").strip()
+            if user_tz.lower() == 'cancel':
+                return None
+            elif user_tz:
+                target_timezone = user_tz
+        
+        if format_choice == '2' or format_choice == '3':
+            keep_time_only = True
     
     print(f"📂 Reading {csv_file}...")
     df = pd.read_csv(csv_file)
@@ -62,23 +83,34 @@ def reformat_timestamps(csv_file=None, target_timezone='America/New_York'):
         print("❌ Error: No '_time' column found in the CSV file.")
         return None
     
-    # Parse timestamps and convert to target timezone
-    print(f"🕒 Reformatting timestamps to {target_timezone} timezone...")
-    
     # First make sure timestamps are parsed as datetime objects
     df['_time'] = pd.to_datetime(df['_time'])
     
-    # Get the timezone object
-    target_tz = pytz.timezone(target_timezone)
+    # Apply timezone conversion if requested
+    if convert_timezone:
+        print(f"🕒 Converting timestamps to {target_timezone} timezone...")
+        # Get the timezone object
+        target_tz = pytz.timezone(target_timezone)
+        # Convert timestamps to the target timezone
+        df['_time'] = df['_time'].dt.tz_convert(target_tz)
     
-    # Convert timestamps to the target timezone
-    df['_time'] = df['_time'].dt.tz_convert(target_tz)
+    # Format based on user preference
+    if keep_time_only:
+        print("⏰ Removing date and keeping only time component...")
+        df['_time'] = df['_time'].dt.strftime('%H:%M:%S')
+    else:
+        # Format to YYYY-MM-DD HH:MM:SS
+        df['_time'] = df['_time'].dt.strftime('%Y-%m-%d %H:%M:%S')
     
-    # Format to YYYY-MM-DD HH:MM:SS
-    df['_time'] = df['_time'].dt.strftime('%Y-%m-%d %H:%M:%S')
-    
-    # Create output filename
-    output_filename = f"{os.path.splitext(csv_file)[0]}_reformatted.csv"
+    # Create output filename with appropriate suffix
+    if convert_timezone and keep_time_only:
+        output_filename = f"{os.path.splitext(csv_file)[0]}_time_only_tz.csv"
+    elif keep_time_only:
+        output_filename = f"{os.path.splitext(csv_file)[0]}_time_only.csv"
+    elif convert_timezone:
+        output_filename = f"{os.path.splitext(csv_file)[0]}_tz_converted.csv"
+    else:
+        output_filename = f"{os.path.splitext(csv_file)[0]}_reformatted.csv"
     
     # Save to new CSV file
     df.to_csv(output_filename, index=False)

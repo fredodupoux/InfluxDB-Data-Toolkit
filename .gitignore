@@ -22,7 +22,7 @@ build/
 
 # macOS system files
 .DS_Store
-
+.png
 # Editor directories and files
 .idea/
 .vscode/
