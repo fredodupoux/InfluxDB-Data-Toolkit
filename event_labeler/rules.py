@@ -1,5 +1,19 @@
 """
-Rule-based labeling functionality for water consumption events
+Rule-Based Labeling Module for Water Event Labeler
+
+This module provides functionality for defining and applying rule-based classification
+to water consumption events. It enables:
+
+- Interactive creation of classification rules with flexible conditions
+- Automated application of rules to label water events by fixture type
+- Rule persistence through JSON storage and retrieval
+- Override control for existing labels
+- Detailed reporting on rule application results and label distributions
+
+The rules engine allows users to create sophisticated classification logic based on
+multiple numerical parameters of water events (duration, volume, flow rates), making 
+it possible to automatically identify different fixture types (shower, toilet, faucet, etc.)
+based on their characteristic consumption patterns.
 """
 
 import json

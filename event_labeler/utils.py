@@ -1,5 +1,15 @@
 """
-Utility functions for the event labeler module
+Utility Module for Water Event Labeler
+
+This module provides common utility functions used throughout the Water Event Labeler
+application, including:
+
+- Screen clearing functionality (cross-platform compatible)
+- Menu display and navigation interfaces
+- User interaction helpers
+
+These utilities support the core functionality of the application while keeping the
+codebase modular and maintainable.
 """
 
 import os

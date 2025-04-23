@@ -1,3 +1,17 @@
+"""
+Configuration Module for InfluxDB Data Toolkit
+
+This module handles loading and saving InfluxDB connection configuration.
+It supports both retrieving configuration from a JSON file and interactively
+prompting the user for configuration details when no file exists.
+
+Configuration is stored in config/influxdb_config.json and includes:
+- InfluxDB server URL
+- Organization ID
+- Bucket name
+- Access token
+"""
+
 import os
 import json
 

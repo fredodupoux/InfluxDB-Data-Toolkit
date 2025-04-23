@@ -1,5 +1,18 @@
 """
-Core functionality for the water event labeler
+Core Functionality Module for Water Event Labeler
+
+This module provides the core functionality for the water event labeling application,
+including:
+
+- Loading and preprocessing water consumption event data
+- Converting time columns to appropriate datetime format
+- Validating required columns are present in datasets
+- Manual labeling interface for water consumption events
+- Train/test splitting functionality for machine learning preparation
+- Integration with visualization components
+
+The module handles the fundamental data operations needed for effective water event
+analysis and classification.
 """
 
 import os

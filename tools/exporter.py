@@ -1,3 +1,19 @@
+"""
+InfluxDB Data Exporter Module
+
+This module handles the export of time series data from InfluxDB to CSV files.
+It provides an interactive interface for configuring and executing data queries
+against an InfluxDB instance, with options for:
+
+- Selecting time range (number of days to query)
+- Filtering by device name
+- Automatic handling of multi-table results
+- Data cleaning and sorting
+- CSV export with standardized naming conventions
+
+Exported files are saved to the _data directory with timestamped filenames.
+"""
+
 import pandas as pd
 import datetime
 from tools.config import load_influxdb_config

@@ -1,5 +1,16 @@
 """
-Visualization functions for water consumption events
+Visualization Module for Water Event Labeler
+
+This module provides specialized visualization functions for analyzing water consumption events.
+It includes:
+
+- Individual event visualization with detailed metrics (volume, flow rate, duration)
+- Cluster visualization to identify patterns in water usage via K-means clustering
+- Time pattern analysis to detect usage patterns throughout the day
+- Interactive plotting for manual labeling assistance
+
+The visualizations help users identify different types of water fixtures (showers, toilets, 
+faucets, etc.) based on their characteristic patterns of water consumption.
 """
 
 import matplotlib.pyplot as plt

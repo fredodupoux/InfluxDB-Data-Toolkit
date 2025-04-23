@@ -1,3 +1,19 @@
+"""
+InfluxDB Data Exporter - Core Module
+
+This module provides the primary functionality for exporting time series data from
+InfluxDB into CSV format for further analysis. Key features include:
+
+- Interactive configuration of InfluxDB connection parameters
+- Customizable query parameters (time range, device filtering)
+- Flux query generation for retrieving water consumption metrics
+- Automatic dataframe cleaning and organization
+- CSV export with standardized naming conventions
+
+This is the root version of the exporter module which is imported by influx_data_toolkit.py.
+A version of this file also exists in the tools directory for modular organization.
+"""
+
 import pandas as pd
 import datetime
 from tools.config import load_influxdb_config

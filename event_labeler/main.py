@@ -1,5 +1,19 @@
 """
-Main entry point for the water event labeling application
+Water Event Labeler - Main Entry Point
+
+This module serves as the main entry point for the Water Event Labeler application,
+which is designed for analyzing and labeling water consumption events from time series data.
+
+Key functionalities:
+- Loading and preprocessing water consumption event data
+- Manual labeling of events with customizable fixture types
+- Rule-based automatic event labeling
+- Visualization of water consumption events
+- Train/test splitting for machine learning model development
+- Exporting labeled datasets for further analysis
+
+The module provides an interactive command-line interface to guide users through
+the event labeling process, with options for both manual and automated approaches.
 """
 
 import os

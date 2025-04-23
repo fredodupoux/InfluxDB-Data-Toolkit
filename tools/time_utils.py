@@ -1,3 +1,17 @@
+"""
+Time Utilities Module for InfluxDB Data Toolkit
+
+This module provides functionality for reformatting timestamps in CSV data files.
+It supports:
+- Converting timestamps between different timezones
+- Removing date components to keep only time values
+- Combining timezone conversion and date removal
+- Interactive file selection from both the root directory and _data directory
+
+The processed files are saved with clear naming conventions that indicate the
+transformations applied (_time_only, _tz_converted, etc.)
+"""
+
 import pandas as pd
 import os
 import datetime

@@ -1,3 +1,20 @@
+"""
+Data Cleaning Module for InfluxDB Data Toolkit
+
+This module provides interactive data cleaning functionality for preparing CSV data files
+for machine learning and analysis. It offers capabilities for:
+
+- Loading CSV files from both the root directory and _data directory
+- Removing columns that are not needed for analysis
+- Filtering data based on column values (equals, less than, greater than)
+- Renaming individual columns or multiple columns at once
+- Viewing summary statistics and previewing data
+- Saving cleaned data with appropriate naming conventions
+
+The module presents an interactive menu-driven interface that guides users through
+the cleaning process step by step.
+"""
+
 import pandas as pd
 import os
 import datetime
