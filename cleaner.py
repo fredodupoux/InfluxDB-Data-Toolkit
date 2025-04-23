@@ -29,10 +29,16 @@ def clean_data_for_ml(csv_file=None):
         print("📁 Available CSV files:")
         for i, file in enumerate(csv_files):
             print(f"{i+1}. {file}")
+        print("0. 🔙 Go back to main menu")
         
         while True:
+            file_input = input("\n🔢 Select a file number (0 to go back): ")
+            if file_input.lower() == 'cancel' or file_input == '0':
+                print("🔙 Operation cancelled")
+                return None
+                
             try:
-                file_idx = int(input("\n🔢 Select a file number: ")) - 1
+                file_idx = int(file_input) - 1
                 if 0 <= file_idx < len(csv_files):
                     csv_file = csv_files[file_idx]
                     break
@@ -59,15 +65,19 @@ def clean_data_for_ml(csv_file=None):
         print("3️⃣ Show summary statistics")
         print("4️⃣ Show first 5 rows")
         print("5️⃣ Save and exit")
-        print("6️⃣ Cancel (return to main menu)")
+        print("0️⃣ 🔙 Return to main menu")
         
+        choice_input = input("\n🔍 Enter your choice (0-5): ")
+        if choice_input.lower() == 'cancel' or choice_input == "0":
+            return None
+            
         try:
-            choice = int(input("\n🔍 Enter your choice: "))
+            choice = int(choice_input)
             
             if choice == 1:
                 # Remove a column
                 print(f"\n📋 Available columns: {', '.join(df.columns)}")
-                col = input("🗑️ Enter the column name to remove (or 'cancel'): ")
+                col = input("🗑️ Enter the column name to remove : ")
                 if col.lower() == 'cancel':
                     continue
                 elif col in df.columns:
@@ -79,7 +89,7 @@ def clean_data_for_ml(csv_file=None):
             elif choice == 2:
                 # Filter values in a column
                 print(f"\n📋 Available columns: {', '.join(df.columns)}")
-                col = input("🔍 Enter column name to filter (or 'cancel'): ")
+                col = input("🔍 Enter column name to filter : ")
                 if col.lower() == 'cancel':
                     continue
                 elif col in df.columns:
@@ -91,8 +101,13 @@ def clean_data_for_ml(csv_file=None):
                     else:
                         print(f"📈 Column statistics: Min={df[col].min()}, Max={df[col].max()}, Mean={df[col].mean()}")
                     
-                    filter_type = input("⚙️ Filter by (1) Equals, (2) Less than, (3) Greater than: ")
-                    filter_val = input("💯 Enter the value: ")
+                    filter_type = input("⚙️ Filter by (1) Equals, (2) Less than, (3) Greater than : ")
+                    if filter_type.lower() == 'cancel':
+                        continue
+                        
+                    filter_val = input("💯 Enter the value : ")
+                    if filter_val.lower() == 'cancel':
+                        continue
                     
                     try:
                         # Convert value to appropriate type
@@ -133,11 +148,6 @@ def clean_data_for_ml(csv_file=None):
                 output_filename = f"{os.path.splitext(csv_file)[0]}_clean.csv"
                 df.to_csv(output_filename, index=False)
                 print(f"💾 Cleaned data saved to {output_filename}")
-                cleaned = True
-            
-            elif choice == 6:
-                # Cancel and return to main menu
-                print("⏪ Returning to main menu...")
                 cleaned = True
             
             else:

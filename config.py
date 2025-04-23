@@ -12,6 +12,7 @@ def load_influxdb_config():
     --------
     dict
         Dictionary containing InfluxDB configuration (url, token, org, bucket)
+        Returns empty dict if user cancels
     """
     # Check if configuration file exists
     if os.path.exists(CONFIG_FILE):
@@ -28,10 +29,29 @@ def load_influxdb_config():
     
     # Prompt the user for configuration
     config = {}
-    config['url'] = input("🌐 Enter InfluxDB URL (e.g. http://localhost:8086): ")
-    config['org'] = input("🏢 Enter organization ID: ")
-    config['bucket'] = input("🪣 Enter bucket name: ")
-    config['token'] = input("🔑 Enter access token: ")
+    url = input("🌐 Enter InfluxDB URL (e.g. http://localhost:8086): ")
+    if url.lower() == 'cancel':
+        print("🔙 Configuration cancelled")
+        return {}
+    config['url'] = url
+    
+    org = input("🏢 Enter organization ID : ")
+    if org.lower() == 'cancel':
+        print("🔙 Configuration cancelled")
+        return {}
+    config['org'] = org
+    
+    bucket = input("🪣 Enter bucket name : ")
+    if bucket.lower() == 'cancel':
+        print("🔙 Configuration cancelled")
+        return {}
+    config['bucket'] = bucket
+    
+    token = input("🔑 Enter access token : ")
+    if token.lower() == 'cancel':
+        print("🔙 Configuration cancelled")
+        return {}
+    config['token'] = token
     
     # Save configuration for future use
     try:

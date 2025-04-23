@@ -9,15 +9,29 @@ def export_data_from_influxdb():
     Returns:
     --------
     str
-        Path to the exported CSV file
+        Path to the exported CSV file, or None if cancelled
     """
     # Load InfluxDB configuration from file or user input
     config = load_influxdb_config()
     
     # Query options
     print("\n📊 Query options:")
-    days = input("📅 Enter number of days to query (default: 3): ") or "3"
-    device = input("🔌 Enter device name to filter (default: WaterMeter): ") or "WaterMeter"
+    print("1. Continue with query parameters")
+    print("0. 🔙 Go back to main menu")
+    
+    query_choice = input("\n🔍 Enter your choice (0-1): ")
+    if query_choice == "0" or query_choice.lower() == 'cancel':
+        return None
+    
+    days = input("📅 Enter number of days to query (default: 3): ")
+    if days.lower() == 'cancel':
+        return None
+    days = days or "3"
+    
+    device = input("🔌 Enter device name to filter (default: WaterMeter): ")
+    if device.lower() == 'cancel':
+        return None
+    device = device or "WaterMeter"
     
     # Updated query with user parameters
     query = f'''

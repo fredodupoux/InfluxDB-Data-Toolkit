@@ -32,10 +32,15 @@ def reformat_timestamps(csv_file=None, target_timezone='America/New_York'):
         print("📁 Available CSV files:")
         for i, file in enumerate(csv_files):
             print(f"{i+1}. {file}")
+        print("0. 🔙 Go back to main menu")
         
         while True:
+            file_input = input("\n🔢 Select a file number (0 to go back): ")
+            if file_input.lower() == 'cancel' or file_input == '0':
+                return None
+                
             try:
-                file_idx = int(input("\n🔢 Select a file number: ")) - 1
+                file_idx = int(file_input) - 1
                 if 0 <= file_idx < len(csv_files):
                     csv_file = csv_files[file_idx]
                     break
@@ -47,8 +52,8 @@ def reformat_timestamps(csv_file=None, target_timezone='America/New_York'):
         # Ask for target timezone
         print("\n🌍 Common timezones: America/New_York, America/Chicago, America/Denver, America/Los_Angeles, Europe/London")
         user_tz = input("🕒 Enter target timezone (default: America/New_York): ").strip()
-        if user_tz:
-            target_timezone = user_tz
+        if user_tz.lower() == 'cancel':
+            return None
     
     print(f"📂 Reading {csv_file}...")
     df = pd.read_csv(csv_file)

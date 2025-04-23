@@ -18,6 +18,7 @@ def display_menu():
     print("3️⃣ Reformat timestamps and adjust timezone")
     print("4️⃣ Launch ML preparation tool (separate process)")
     print("5️⃣ Exit program")
+    print("\n💡 Type 'cancel' at any prompt to return to this menu")
     return input("\n🔍 Enter your choice (1-5): ")
 
 def launch_ml_tool(csv_file=None):
@@ -54,6 +55,9 @@ def main():
     while running:
         choice = display_menu()
         
+        if choice.lower() == "cancel":
+            continue
+        
         if choice == "1":
             # Export data from InfluxDB
             exported_file = export_data_from_influxdb()
@@ -65,38 +69,47 @@ def main():
                 print("1. Clean the data")
                 print("2. Reformat timestamps")
                 print("3. Launch ML preparation tool")
-                print("4. Return to main menu")
-                next_step = input("\n🔍 What would you like to do next? (1-4): ")
+                print("0. 🔙 Return to main menu")
+                next_step = input("\n🔍 What would you like to do next? (0-3): ")
                 
-                if next_step == "1":
+                if next_step.lower() == "cancel" or next_step == "0":
+                    continue
+                elif next_step == "1":
                     clean_data_for_ml(exported_file)
                 elif next_step == "2":
                     reformatted_file = reformat_timestamps(exported_file)
-                    if reformatted_file and input("\n🔄 Would you like to launch the ML preparation tool with this file? (y/n): ").lower() == 'y':
-                        launch_ml_tool(reformatted_file)
+                    if reformatted_file:
+                        ml_choice = input("\n🔄 Would you like to launch the ML preparation tool with this file? (y/n): ").lower()
+                        if ml_choice == "cancel":
+                            continue
+                        elif ml_choice == 'y':
+                            launch_ml_tool(reformatted_file)
                 elif next_step == "3":
                     launch_ml_tool(exported_file)
-            
-            input("\n⏸️ Press Enter to continue...")
         
         elif choice == "2":
             # Clean existing CSV data
             cleaned_file = clean_data_for_ml()
-            if cleaned_file and input("\n🔄 Would you like to launch the ML preparation tool with this file? (y/n): ").lower() == 'y':
-                launch_ml_tool(cleaned_file)
-            input("\n⏸️ Press Enter to continue...")
+            if cleaned_file:
+                ml_choice = input("\n🔄 Would you like to launch the ML preparation tool with this file? (y/n): ").lower()
+                if ml_choice == "cancel":
+                    continue
+                elif ml_choice == 'y':
+                    launch_ml_tool(cleaned_file)
         
         elif choice == "3":
             # Reformat timestamps
             reformatted_file = reformat_timestamps()
-            if reformatted_file and input("\n🔄 Would you like to launch the ML preparation tool with this file? (y/n): ").lower() == 'y':
-                launch_ml_tool(reformatted_file)
-            input("\n⏸️ Press Enter to continue...")
+            if reformatted_file:
+                ml_choice = input("\n🔄 Would you like to launch the ML preparation tool with this file? (y/n): ").lower()
+                if ml_choice == "cancel":
+                    continue
+                elif ml_choice == 'y':
+                    launch_ml_tool(reformatted_file)
         
         elif choice == "4":
             # Launch ML preparation tool
             launch_ml_tool()
-            input("\n⏸️ Press Enter to continue...")
         
         elif choice == "5":
             # Exit program
@@ -105,7 +118,6 @@ def main():
         
         else:
             print("❌ Invalid choice. Please try again.")
-            input("\n⏸️ Press Enter to continue...")
 
 if __name__ == "__main__":
     main()
