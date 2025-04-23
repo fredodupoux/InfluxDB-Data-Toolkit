@@ -5,8 +5,8 @@ A comprehensive Python toolkit for exporting, cleaning, processing, and preparin
 ## Features
 
 - 🔄 **Export Data**: Query and export data from InfluxDB with customizable parameters
-- 🧹 **Clean Data**: Interactive data cleaning tool with options to remove columns and filter values
-- 🕒 **Reformat Timestamps**: Convert timestamps to different timezones and formats
+- 🧹 **Clean Data**: Interactive data cleaning tool with options to remove columns, filter values, and rename columns
+- 🕒 **Reformat Timestamps**: Convert timestamps to different timezones and formats, with options to keep only time components
 - 📊 **Data Visualization**: Preview data and statistics directly in the console
 - 🔒 **Secure Credentials**: Store InfluxDB credentials securely, protected from Git
 - 🧠 **ML Preparation**: Advanced machine learning data preparation tools including:
@@ -49,6 +49,23 @@ The interactive menu will guide you through the available options:
 3. Reformat timestamps and adjust timezone
 4. Launch ML preparation tool
 5. Exit program
+
+## Data Cleaning Features
+
+The toolkit provides powerful data cleaning capabilities:
+- Remove columns from datasets
+- Filter data based on column values (equals, less than, greater than)
+- Rename individual columns or multiple columns at once
+- View summary statistics of your data
+- Preview data before and after operations
+
+## Timestamp Formatting Options
+
+The timestamp formatter now supports multiple operations:
+- Convert timestamps between different timezones
+- Remove date components (keep only time values)
+- Combine both operations at once
+- Clear naming convention for processed files (_time_only, _tz_converted, etc.)
 
 ## ML Preparation Tool
 
