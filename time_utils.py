@@ -48,36 +48,44 @@ def reformat_timestamps(csv_file=None, target_timezone='America/New_York'):
                     print("❌ Invalid selection. Please try again.")
             except ValueError:
                 print("❌ Please enter a valid number.")
-        
-        # Show timestamp format options menu
-        print("\n🕰️ Timestamp Format Options:")
-        print("1. Convert timezone")
-        print("2. Remove date (keep only time)")
-        print("3. Both convert timezone and remove date")
-        print("0. 🔙 Go back")
-        
-        format_choice = input("\n🔢 Select an option (0-3): ")
-        if format_choice.lower() == 'cancel' or format_choice == '0':
-            return None
-            
-        # Initialize formatting options
-        convert_timezone = False
-        keep_time_only = False
-        
-        if format_choice == '1' or format_choice == '3':
-            convert_timezone = True
-            print("\n🌍 Common timezones: America/New_York, America/Chicago, America/Denver, America/Los_Angeles, Europe/London")
-            user_tz = input("🕒 Enter target timezone (default: America/New_York): ").strip()
-            if user_tz.lower() == 'cancel':
-                return None
-            elif user_tz:
-                target_timezone = user_tz
-        
-        if format_choice == '2' or format_choice == '3':
-            keep_time_only = True
     
     print(f"📂 Reading {csv_file}...")
     df = pd.read_csv(csv_file)
+    
+    # Show file info and preview immediately after loading
+    print(f"\n✅ Data loaded. Shape: {df.shape}")
+    print(f"📊 Columns: {', '.join(df.columns)}")
+    
+    # Show first 5 rows immediately after loading
+    print("\n👀 Preview of loaded data (first 5 rows):")
+    print(df.head().to_string())
+        
+    # Show timestamp format options menu
+    print("\n🕰️ Timestamp Format Options:")
+    print("1. Convert timezone")
+    print("2. Remove date (keep only time)")
+    print("3. Both convert timezone and remove date")
+    print("0. 🔙 Go back")
+    
+    format_choice = input("\n🔢 Select an option (0-3): ")
+    if format_choice.lower() == 'cancel' or format_choice == '0':
+        return None
+        
+    # Initialize formatting options
+    convert_timezone = False
+    keep_time_only = False
+    
+    if format_choice == '1' or format_choice == '3':
+        convert_timezone = True
+        print("\n🌍 Common timezones: America/New_York, America/Chicago, America/Denver, America/Los_Angeles, Europe/London")
+        user_tz = input("🕒 Enter target timezone (default: America/New_York): ").strip()
+        if user_tz.lower() == 'cancel':
+            return None
+        elif user_tz:
+            target_timezone = user_tz
+    
+    if format_choice == '2' or format_choice == '3':
+        keep_time_only = True
     
     if '_time' not in df.columns:
         print("❌ Error: No '_time' column found in the CSV file.")

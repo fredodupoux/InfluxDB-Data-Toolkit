@@ -54,6 +54,10 @@ def clean_data_for_ml(csv_file=None):
     print(f"\n✅ Data loaded. Shape: {df.shape}")
     print(f"📊 Columns: {', '.join(df.columns)}")
     
+    # Show first 5 rows immediately after loading
+    print("\n👀 Preview of loaded data (first 5 rows):")
+    print(df.head().to_string())
+    
     # Start the interactive cleaning process
     cleaned = False
     output_filename = None
@@ -132,7 +136,7 @@ def clean_data_for_ml(csv_file=None):
                         print("❌ Invalid value for the selected column type.")
                 else:
                     print(f"❌ Column '{col}' not found.")
-            
+                    
             elif choice == 3:
                 # Rename column(s)
                 print(f"\n📋 Current columns: {', '.join(df.columns)}")
