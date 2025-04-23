@@ -1,6 +1,6 @@
 # InfluxDB Data Toolkit
 
-A comprehensive Python toolkit for exporting, cleaning, and processing time series data from InfluxDB, primarily designed for working with water meter data.
+A comprehensive Python toolkit for exporting, cleaning, processing, and preparing time series data from InfluxDB for machine learning, primarily designed for working with water meter data.
 
 ## Features
 
@@ -9,6 +9,12 @@ A comprehensive Python toolkit for exporting, cleaning, and processing time seri
 - 🕒 **Reformat Timestamps**: Convert timestamps to different timezones and formats
 - 📊 **Data Visualization**: Preview data and statistics directly in the console
 - 🔒 **Secure Credentials**: Store InfluxDB credentials securely, protected from Git
+- 🧠 **ML Preparation**: Advanced machine learning data preparation tools including:
+  - Feature engineering and extraction
+  - Anomaly detection
+  - Data visualization for ML features
+  - Feature distribution analysis
+  - Data normalization and scaling
 
 ## Requirements
 
@@ -16,13 +22,16 @@ A comprehensive Python toolkit for exporting, cleaning, and processing time seri
 - pandas
 - influxdb-client
 - pytz
+- matplotlib
+- scikit-learn
+- numpy
 
 ## Installation
 
 1. Clone this repository
 2. Install the required dependencies:
    ```bash
-   pip install pandas influxdb-client pytz
+   pip install -r requirements.txt
    ```
 
 ## Usage
@@ -38,13 +47,23 @@ The interactive menu will guide you through the available options:
 1. Export data from InfluxDB
 2. Clean existing CSV data for machine learning
 3. Reformat timestamps and adjust timezone
-4. Exit program
+4. Launch ML preparation tool
+5. Exit program
 
-## Security Notes
+## ML Preparation Tool
 
-- InfluxDB credentials are stored in a `influxdb_config.json` file
-- This file is included in `.gitignore` to prevent accidental exposure
-- The script will prompt for credentials on first run
+The ML preparation tool provides specialized functionality for preparing time series data for machine learning:
+
+```bash
+python ml_toolkit.py [optional_csv_file]
+```
+
+Features include:
+- Feature extraction from time series data
+- Statistical analysis and visualization of features
+- Anomaly detection using various algorithms
+- Data normalization and scaling options
+- Export of ML-ready datasets
 
 ## Example Workflow
 
@@ -52,7 +71,8 @@ The interactive menu will guide you through the available options:
 2. Preview the exported data
 3. Reformat timestamps to your local timezone
 4. Clean the data by removing unnecessary columns or filtering values
-5. Use the cleaned data for analysis or machine learning
+5. Use the ML preparation tool to engineer features and analyze the data
+6. Export prepared data for use with machine learning models
 
 ## License
 
