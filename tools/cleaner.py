@@ -28,6 +28,106 @@ def clear_screen():
     elif os.name == 'nt':
         os.system('cls')
 
+def apply_cleaning_operations(df, operations):
+    """
+    Apply a list of cleaning operations to a DataFrame.
+
+    Parameters:
+    -----------
+    df : pd.DataFrame
+        The DataFrame to clean.
+    operations : list
+        A list of dictionaries, each specifying an operation.
+        Example: [
+            {"action": "remove_column", "column": "col_name"},
+            {"action": "filter", "column": "col_name", "operator": ">", "value": 10},
+            {"action": "rename_column", "old_name": "old_col", "new_name": "new_col"}
+        ]
+
+    Returns:
+    --------
+    pd.DataFrame
+        The cleaned DataFrame.
+
+    Raises:
+    -------
+    ValueError
+        If an invalid operation or parameter is provided.
+    KeyError
+        If a specified column does not exist.
+    """
+    df_cleaned = df.copy()
+    print(f"Starting cleaning with {len(operations)} operations.") # Server log
+
+    for op in operations:
+        action = op.get('action')
+        print(f"Applying operation: {action}") # Server log
+
+        if action == 'remove_column':
+            col = op.get('column')
+            if not col:
+                raise ValueError("Missing 'column' for remove_column operation.")
+            if col in df_cleaned.columns:
+                df_cleaned = df_cleaned.drop(columns=[col])
+                print(f"  Removed column: {col}") # Server log
+            else:
+                raise KeyError(f"Column '{col}' not found for removal.")
+
+        elif action == 'filter':
+            col = op.get('column')
+            operator = op.get('operator')
+            value = op.get('value')
+            if not col or not operator or value is None:
+                raise ValueError("Missing 'column', 'operator', or 'value' for filter operation.")
+            if col not in df_cleaned.columns:
+                raise KeyError(f"Column '{col}' not found for filtering.")
+
+            try:
+                # Attempt type conversion based on column dtype
+                col_dtype = df_cleaned[col].dtype
+                if pd.api.types.is_numeric_dtype(col_dtype):
+                    filter_value = float(value)
+                elif pd.api.types.is_datetime64_any_dtype(col_dtype):
+                    filter_value = pd.to_datetime(value)
+                # Add more type checks if needed (e.g., boolean)
+                else:
+                    filter_value = str(value) # Default to string comparison
+
+                original_len = len(df_cleaned)
+                if operator == '==':
+                    df_cleaned = df_cleaned[df_cleaned[col] == filter_value]
+                elif operator == '!=':
+                    df_cleaned = df_cleaned[df_cleaned[col] != filter_value]
+                elif operator == '>':
+                    df_cleaned = df_cleaned[df_cleaned[col] > filter_value]
+                elif operator == '<':
+                    df_cleaned = df_cleaned[df_cleaned[col] < filter_value]
+                elif operator == '>=':
+                    df_cleaned = df_cleaned[df_cleaned[col] >= filter_value]
+                elif operator == '<=':
+                    df_cleaned = df_cleaned[df_cleaned[col] <= filter_value]
+                else:
+                    raise ValueError(f"Invalid operator '{operator}' for filter operation.")
+                print(f"  Filtered column '{col}' {operator} {filter_value}. Rows removed: {original_len - len(df_cleaned)}") # Server log
+            except (ValueError, TypeError) as e:
+                raise ValueError(f"Invalid value '{value}' or type mismatch for filtering column '{col}': e")
+
+        elif action == 'rename_column':
+            old_name = op.get('old_name')
+            new_name = op.get('new_name')
+            if not old_name or not new_name:
+                raise ValueError("Missing 'old_name' or 'new_name' for rename_column operation.")
+            if old_name not in df_cleaned.columns:
+                raise KeyError(f"Column '{old_name}' not found for renaming.")
+            df_cleaned = df_cleaned.rename(columns={old_name: new_name})
+            print(f"  Renamed column '{old_name}' to '{new_name}'") # Server log
+
+        else:
+            raise ValueError(f"Unknown cleaning action: '{action}'")
+
+    print(f"Finished cleaning. Final shape: {df_cleaned.shape}") # Server log
+    return df_cleaned
+
 def clean_data_for_ml(csv_file=None):
     """
     Interactive function to clean and prepare CSV data for a machine learning model.

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfluxDB Data Toolkit - Web UI</title>
+    <!-- Link to CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>InfluxDB Data Toolkit</h1>
+
+    <div id="app">
+
+        <!-- Export Section -->
+        <div class="form-section">
+            <h2>Export Data from InfluxDB</h2>
+            <form id="export-form">
+                <div>
+                    <label for="export-days">Days to Query:</label>
+                    <input type="number" id="export-days" name="days" value="3" min="1" required>
+                </div>
+                <div>
+                    <label for="export-device">Device Name:</label>
+                    <input type="text" id="export-device" name="device" value="WaterMeter" required>
+                </div>
+                <button type="submit">Export Data</button>
+            </form>
+            <div id="export-status" class="status-message" style="display: none;"></div>
+        </div>
+
+        <!-- File List Section -->
+        <div id="file-list-section" class="form-section">
+            <h2>Available Data Files (_data directory)</h2>
+            <ul id="file-list">
+                <li>Loading file list...</li>
+                <!-- File list will be populated by JavaScript -->
+            </ul>
+             <div id="file-list-status" class="status-message" style="display: none;"></div>
+        </div>
+
+        <!-- Clean Data Section -->
+        <div id="clean-data-section" class="form-section">
+            <h2>Clean Data File</h2>
+            <div>
+                <label for="file-select-for-cleaning">Select File to Clean:</label>
+                <select id="file-select-for-cleaning" disabled>
+                    <option value="">-- Select a file --</option>
+                    <!-- Options populated by JS -->
+                </select>
+            </div>
+
+            <div id="preview-area" style="display: none;">
+                <h4>File Preview</h4>
+                <p id="preview-info"></p>
+                <div id="preview-table-container"></div>
+            </div>
+
+            <div id="operations-builder" style="display: none;">
+                <h4>Cleaning Operations</h4>
+                <div class="operation-controls">
+                    <button id="add-remove-col-btn">Remove Column</button>
+                    <button id="add-filter-btn">Filter Rows</button>
+                    <button id="add-rename-col-btn">Rename Column</button>
+                </div>
+                <ul id="operations-list">
+                    <!-- Operations added by JS -->
+                </ul>
+                <button id="execute-clean-button" disabled>Execute Cleaning</button>
+            </div>
+            <div id="clean-status" class="status-message" style="display: none;"></div>
+        </div>
+
+        <!-- Other sections (Reformat, Labeler) will go here later -->
+        <!-- Reformat Timestamps Section -->
+        <div id="reformat-time-section" class="form-section">
+            <h2>Reformat Timestamps</h2>
+            <div>
+                <label for="file-select-for-reformat">Select File to Reformat:</label>
+                <select id="file-select-for-reformat" disabled>
+                    <option value="">-- Select a file --</option>
+                    <!-- Options populated by JS -->
+                </select>
+            </div>
+            <div id="reformat-options" style="margin-top: 10px;">
+                 <div>
+                    <input type="checkbox" id="reformat-convert-tz-checkbox" name="convertTimezone">
+                    <label for="reformat-convert-tz-checkbox">Convert Timezone?</label>
+                </div>
+                 <div id="reformat-tz-input-div" style="display: none; margin-left: 20px; margin-bottom: 10px;">
+                     <label for="reformat-target-tz">Target Timezone:</label>
+                     <input type="text" id="reformat-target-tz" name="targetTimezone" placeholder="e.g., America/New_York, Europe/London">
+                     <small>Common: America/New_York, America/Chicago, America/Denver, America/Los_Angeles, Europe/London, UTC</small>
+                 </div>
+                 <div>
+                    <input type="checkbox" id="reformat-keep-time-only-checkbox" name="keepTimeOnly">
+                    <label for="reformat-keep-time-only-checkbox">Keep Time Only (Remove Date)?</label>
+                </div>
+            </div>
+            <button id="execute-reformat-button" disabled>Reformat Timestamps</button>
+            <div id="reformat-status" class="status-message" style="display: none;"></div>
+        </div>
+
+
+    </div>
+
+    <!-- Modals for Cleaning Operations -->
+    <div id="remove-col-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('remove-col-modal')">&times;</span>
+            <h3>Remove Column</h3>
+            <label for="remove-col-select">Column to Remove:</label>
+            <select id="remove-col-select"></select>
+            <button id="confirm-remove-col">Add Operation</button>
+            <button onclick="closeModal('remove-col-modal')">Cancel</button>
+        </div>
+    </div>
+
+    <div id="filter-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('filter-modal')">&times;</span>
+            <h3>Filter Rows</h3>
+            <label for="filter-col-select">Column:</label>
+            <select id="filter-col-select"></select>
+            <label for="filter-operator-select">Operator:</label>
+            <select id="filter-operator-select">
+                <option value="==">== (Equals)</option>
+                <option value="!=">!= (Not Equals)</option>
+                <option value=">">> (Greater Than)</option>
+                <option value="<"> < (Less Than)</option>
+                <option value=">=">>= (Greater Than or Equal)</option>
+                <option value="<="><= (Less Than or Equal)</option>
+            </select>
+            <label for="filter-value-input">Value:</label>
+            <input type="text" id="filter-value-input" placeholder="Enter value to filter by">
+            <button id="confirm-filter">Add Operation</button>
+            <button onclick="closeModal('filter-modal')">Cancel</button>
+        </div>
+    </div>
+
+    <div id="rename-col-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('rename-col-modal')">&times;</span>
+            <h3>Rename Column</h3>
+            <label for="rename-col-select">Column to Rename:</label>
+            <select id="rename-col-select"></select>
+            <label for="rename-new-name-input">New Name:</label>
+            <input type="text" id="rename-new-name-input" placeholder="Enter new column name">
+            <button id="confirm-rename-col">Add Operation</button>
+            <button onclick="closeModal('rename-col-modal')">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Embedded JavaScript -->
+    <script>
+        // --- DOM Elements ---
+        const exportForm = document.getElementById('export-form');
+        const exportStatusDiv = document.getElementById('export-status');
+        const fileListUl = document.getElementById('file-list');
+        const fileListStatusDiv = document.getElementById('file-list-status');
+        const fileSelectForCleaning = document.getElementById('file-select-for-cleaning');
+        const previewArea = document.getElementById('preview-area');
+        const previewInfo = document.getElementById('preview-info');
+        const previewTableContainer = document.getElementById('preview-table-container');
+        const operationsBuilder = document.getElementById('operations-builder');
+        const operationsListUl = document.getElementById('operations-list');
+        const executeCleanButton = document.getElementById('execute-clean-button');
+        const cleanStatusDiv = document.getElementById('clean-status');
+        const addRemoveColBtn = document.getElementById('add-remove-col-btn');
+        const addFilterBtn = document.getElementById('add-filter-btn');
+        const addRenameColBtn = document.getElementById('add-rename-col-btn');
+
+        // Modal elements
+        const removeColModal = document.getElementById('remove-col-modal');
+        const filterModal = document.getElementById('filter-modal');
+        const renameColModal = document.getElementById('rename-col-modal');
+        const removeColSelect = document.getElementById('remove-col-select');
+        const filterColSelect = document.getElementById('filter-col-select');
+        const filterOperatorSelect = document.getElementById('filter-operator-select');
+        const filterValueInput = document.getElementById('filter-value-input');
+        const renameColSelect = document.getElementById('rename-col-select');
+        const renameNewNameInput = document.getElementById('rename-new-name-input');
+
+        // Reformat Timestamp elements
+        const fileSelectForReformat = document.getElementById('file-select-for-reformat');
+        const reformatConvertTzCheckbox = document.getElementById('reformat-convert-tz-checkbox');
+        const reformatTzInputDiv = document.getElementById('reformat-tz-input-div');
+        const reformatTargetTzInput = document.getElementById('reformat-target-tz');
+        const reformatKeepTimeOnlyCheckbox = document.getElementById('reformat-keep-time-only-checkbox');
+        const executeReformatButton = document.getElementById('execute-reformat-button');
+        const reformatStatusDiv = document.getElementById('reformat-status');
+
+        // --- State ---
+        let availableFiles = [];
+        let selectedFileForCleaning = null;
+        let selectedFileForReformat = null; // Added state for reformat section
+        let currentPreviewData = null;
+        let cleaningOperations = []; // Array to hold operation objects
+
+        // --- Helper function to display status messages ---
+        function showStatus(element, message, type = 'info') {
+            element.textContent = message;
+            element.className = `status-message status-${type}`;
+            element.style.display = 'block';
+        }
+
+        // --- Function to fetch and display files ---
+        async function fetchFiles() {
+            fileListUl.innerHTML = '<li>Loading file list...</li>'; // Show loading state
+            fileListStatusDiv.style.display = 'none'; // Hide previous status
+            fileListStatusDiv.className = 'status-message'; // Reset class
+            fileSelectForCleaning.innerHTML = '<option value="">-- Select a file --</option>'; // Reset select
+            fileSelectForReformat.innerHTML = '<option value="">-- Select a file --</option>'; // Reset reformat select
+            fileSelectForCleaning.disabled = true;
+            fileSelectForReformat.disabled = true; // Disable reformat select initially
+            availableFiles = [];
+
+            try {
+                const response = await fetch('/api/files');
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: `HTTP error! status: ${response.status}` }));
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+                const files = await response.json();
+                availableFiles = files; // Store files
+
+                fileListUl.innerHTML = ''; // Clear loading/previous list
+                if (files.length === 0) {
+                    fileListUl.innerHTML = '<li>No CSV files found in _data directory.</li>';
+                } else {
+                    files.forEach(file => {
+                        const li = document.createElement('li');
+                        li.textContent = file;
+                        fileListUl.appendChild(li);
+
+                        // Add option to the cleaning select dropdown
+                        const optionClean = document.createElement('option');
+                        optionClean.value = file;
+                        optionClean.textContent = file;
+                        fileSelectForCleaning.appendChild(optionClean);
+
+                        // Add option to the reformat select dropdown
+                        const optionReformat = document.createElement('option');
+                        optionReformat.value = file;
+                        optionReformat.textContent = file;
+                        fileSelectForReformat.appendChild(optionReformat);
+                    });
+                    fileSelectForCleaning.disabled = false; // Enable select if files exist
+                    fileSelectForReformat.disabled = false; // Enable reformat select if files exist
+                }
+            } catch (error) {
+                console.error('Error fetching files:', error);
+                fileListUl.innerHTML = ''; // Clear loading message
+                fileListStatusDiv.textContent = `Error loading files: ${error.message}`;
+                fileListStatusDiv.className = 'status-message status-error';
+                fileListStatusDiv.style.display = 'block';
+            }
+        }
+
+        // --- Function to fetch and display file preview ---
+        async function fetchAndDisplayPreview(filename) {
+            if (!filename) {
+                previewArea.style.display = 'none';
+                operationsBuilder.style.display = 'none';
+                currentPreviewData = null;
+                return;
+            }
+
+            showStatus(cleanStatusDiv, 'Loading preview...', 'loading');
+            previewArea.style.display = 'none';
+            operationsBuilder.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/preview', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: filename })
+                });
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || `Preview failed with status: ${response.status}`);
+                }
+
+                currentPreviewData = result; // Store preview data
+
+                // Display preview info
+                previewInfo.textContent = `Shape: (${result.shape.join(', ')}), Columns: ${result.columns.length}`;
+
+                // Display preview table (head)
+                previewTableContainer.innerHTML = ''; // Clear previous table
+                if (result.head && result.head.length > 0) {
+                    const table = document.createElement('table');
+                    const thead = table.createTHead();
+                    const tbody = table.createTBody();
+                    const headerRow = thead.insertRow();
+
+                    // Create headers
+                    result.columns.forEach(colName => {
+                        const th = document.createElement('th');
+                        th.textContent = colName;
+                        headerRow.appendChild(th);
+                    });
+
+                    // Create rows
+                    result.head.forEach(rowData => {
+                        const row = tbody.insertRow();
+                        result.columns.forEach(colName => {
+                            const cell = row.insertCell();
+                            cell.textContent = rowData[colName] !== null && rowData[colName] !== undefined ? rowData[colName] : '';
+                        });
+                    });
+                    previewTableContainer.appendChild(table);
+                }
+
+                previewArea.style.display = 'block';
+                operationsBuilder.style.display = 'block'; // Show operations builder
+                cleanStatusDiv.style.display = 'none'; // Hide loading message
+                resetCleaningOperations(); // Clear any previous operations
+
+            } catch (error) {
+                console.error('Preview error:', error);
+                showStatus(cleanStatusDiv, `Failed to load preview: ${error.message}`, 'error');
+                currentPreviewData = null;
+            }
+        }
+
+        // --- Cleaning Operations Logic ---
+        function addCleaningOperation(operation) {
+            cleaningOperations.push(operation);
+            renderOperationsList();
+            executeCleanButton.disabled = false; // Enable execute button
+        }
+
+        function removeCleaningOperation(index) {
+            cleaningOperations.splice(index, 1);
+            renderOperationsList();
+            executeCleanButton.disabled = cleaningOperations.length === 0; // Disable if no operations
+        }
+
+        function renderOperationsList() {
+            operationsListUl.innerHTML = ''; // Clear list
+            cleaningOperations.forEach((op, index) => {
+                const li = document.createElement('li');
+                let description = '';
+                switch (op.action) {
+                    case 'remove_column':
+                        description = `Remove column: <code>${op.column}</code>`;
+                        break;
+                    case 'filter':
+                        description = `Filter where <code>${op.column}</code> ${op.operator} <code>${op.value}</code>`;
+                        break;
+                    case 'rename_column':
+                        description = `Rename column <code>${op.old_name}</code> to <code>${op.new_name}</code>`;
+                        break;
+                }
+                li.innerHTML = `${description} <button data-index="${index}">Remove</button>`;
+                operationsListUl.appendChild(li);
+            });
+
+            // Add event listeners to new remove buttons
+            operationsListUl.querySelectorAll('button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const indexToRemove = parseInt(e.target.getAttribute('data-index'), 10);
+                    removeCleaningOperation(indexToRemove);
+                });
+            });
+        }
+
+        function resetCleaningOperations() {
+            cleaningOperations = [];
+            renderOperationsList();
+            executeCleanButton.disabled = true;
+        }
+
+        // --- Modal Handling ---
+        function openModal(modalId) {
+            if (!currentPreviewData || !currentPreviewData.columns) {
+                showStatus(cleanStatusDiv, 'Please select a file and wait for the preview to load first.', 'error');
+                return;
+            }
+            // Populate column selects before opening
+            populateColumnSelect(removeColSelect, currentPreviewData.columns);
+            populateColumnSelect(filterColSelect, currentPreviewData.columns);
+            populateColumnSelect(renameColSelect, currentPreviewData.columns);
+
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            // Clear inputs on close
+            if (modalId === 'filter-modal') filterValueInput.value = '';
+            if (modalId === 'rename-col-modal') renameNewNameInput.value = '';
+        }
+
+        function populateColumnSelect(selectElement, columns) {
+            selectElement.innerHTML = ''; // Clear existing options
+            columns.forEach(col => {
+                const option = document.createElement('option');
+                option.value = col;
+                option.textContent = col;
+                selectElement.appendChild(option);
+            });
+        }
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchFiles(); // Initial fetch
+
+            // Export form listener (existing)
+            exportForm.addEventListener('submit', handleExportSubmit);
+
+            // File selection for cleaning
+            fileSelectForCleaning.addEventListener('change', (e) => {
+                selectedFileForCleaning = e.target.value;
+                fetchAndDisplayPreview(selectedFileForCleaning);
+                // Reset reformat selection when changing cleaning file?
+                // fileSelectForReformat.value = '';
+                // selectedFileForReformat = null;
+                // executeReformatButton.disabled = true;
+            });
+
+            // File selection for reformatting
+            fileSelectForReformat.addEventListener('change', (e) => {
+                selectedFileForReformat = e.target.value;
+                executeReformatButton.disabled = !selectedFileForReformat; // Enable button if a file is selected
+                reformatStatusDiv.style.display = 'none'; // Hide status on new selection
+            });
+
+            // Reformat options listeners
+            reformatConvertTzCheckbox.addEventListener('change', (e) => {
+                reformatTzInputDiv.style.display = e.target.checked ? 'block' : 'none';
+            });
+
+            // Execute Reformat button listener
+            executeReformatButton.addEventListener('click', handleReformatSubmit);
+
+
+            // Modal triggers
+            addRemoveColBtn.addEventListener('click', () => openModal('remove-col-modal'));
+            addFilterBtn.addEventListener('click', () => openModal('filter-modal'));
+            addRenameColBtn.addEventListener('click', () => openModal('rename-col-modal'));
+
+            // Modal confirmation buttons
+            document.getElementById('confirm-remove-col').addEventListener('click', () => {
+                const column = removeColSelect.value;
+                if (column) {
+                    addCleaningOperation({ action: 'remove_column', column: column });
+                    closeModal('remove-col-modal');
+                }
+            });
+
+            document.getElementById('confirm-filter').addEventListener('click', () => {
+                const column = filterColSelect.value;
+                const operator = filterOperatorSelect.value;
+                const value = filterValueInput.value;
+                if (column && operator && value !== '') {
+                    addCleaningOperation({ action: 'filter', column: column, operator: operator, value: value });
+                    closeModal('filter-modal');
+                } else {
+                    alert('Please fill in all filter fields.');
+                }
+            });
+
+            document.getElementById('confirm-rename-col').addEventListener('click', () => {
+                const old_name = renameColSelect.value;
+                const new_name = renameNewNameInput.value.trim();
+                if (old_name && new_name) {
+                    if (currentPreviewData.columns.includes(new_name)) {
+                        alert(`Column "${new_name}" already exists. Please choose a different name.`);
+                        return;
+                    }
+                    addCleaningOperation({ action: 'rename_column', old_name: old_name, new_name: new_name });
+                    closeModal('rename-col-modal');
+                } else {
+                    alert('Please select a column and enter a new name.');
+                }
+            });
+
+            // Execute cleaning
+            executeCleanButton.addEventListener('click', async () => {
+                if (!selectedFileForCleaning || cleaningOperations.length === 0) {
+                    showStatus(cleanStatusDiv, 'Please select a file and add at least one cleaning operation.', 'error');
+                    return;
+                }
+
+                showStatus(cleanStatusDiv, 'Applying cleaning operations...', 'loading');
+                executeCleanButton.disabled = true;
+
+                try {
+                    const response = await fetch('/api/clean', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ filename: selectedFileForCleaning, operations: cleaningOperations })
+                    });
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.error || `Cleaning failed with status: ${response.status}`);
+                    }
+
+                    showStatus(cleanStatusDiv, `Cleaning successful! New file created: ${result.cleanedFilename}`, 'success');
+                    fetchFiles(); // Refresh file list
+                    // Optionally, clear selection and operations
+                    // fileSelectForCleaning.value = '';
+                    // selectedFileForCleaning = null;
+                    // fetchAndDisplayPreview(null);
+
+                } catch (error) {
+                    console.error('Cleaning error:', error);
+                    showStatus(cleanStatusDiv, `Cleaning failed: ${error.message}`, 'error');
+                } finally {
+                    // Re-enable button only if operations still exist (might change if we clear them)
+                    executeCleanButton.disabled = cleaningOperations.length === 0;
+                }
+            });
+
+        });
+
+        // Close modals if clicked outside content
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                closeModal(event.target.id);
+            }
+        }
+
+        // --- handleExportSubmit function (existing) ---
+        async function handleExportSubmit(event) {
+            event.preventDefault(); // Prevent default HTML form submission
+
+            const daysInput = document.getElementById('export-days');
+            const deviceInput = document.getElementById('export-device');
+            const days = parseInt(daysInput.value, 10);
+            const device = deviceInput.value.trim();
+
+            if (isNaN(days) || days <= 0) {
+                showStatus(exportStatusDiv, 'Please enter a valid positive number for days.', 'error');
+                return;
+            }
+            if (!device) {
+                showStatus(exportStatusDiv, 'Please enter a device name.', 'error');
+                return;
+            }
+
+            showStatus(exportStatusDiv, 'Exporting data...', 'loading');
+
+            try {
+                const response = await fetch('/api/export', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ days: days, device: device }),
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    // Use error message from server response if available
+                    throw new Error(result.error || `Export failed with status: ${response.status}`);
+                }
+
+                showStatus(exportStatusDiv, `Export successful! File created: ${result.filename}`, 'success');
+                // Refresh the file list after successful export
+                fetchFiles();
+
+            } catch (error) {
+                console.error('Export error:', error);
+                showStatus(exportStatusDiv, `Export failed: ${error.message}`, 'error');
+            }
+        }
+
+        // --- New function to handle Timestamp Reformatting Submit ---
+        async function handleReformatSubmit() {
+            if (!selectedFileForReformat) {
+                showStatus(reformatStatusDiv, 'Please select a file to reformat.', 'error');
+                return;
+            }
+
+            const convertTimezone = reformatConvertTzCheckbox.checked;
+            const keepTimeOnly = reformatKeepTimeOnlyCheckbox.checked;
+            let targetTimezone = reformatTargetTzInput.value.trim();
+
+            if (convertTimezone && !targetTimezone) {
+                // Use default if checkbox is checked but input is empty
+                targetTimezone = 'America/New_York';
+                // Optionally update the input field visually?
+                // reformatTargetTzInput.value = targetTimezone;
+            }
+            if (!convertTimezone) {
+                targetTimezone = null; // Ensure timezone is null if checkbox is unchecked
+            }
+
+            showStatus(reformatStatusDiv, 'Reformatting timestamps...', 'loading');
+            executeReformatButton.disabled = true;
+
+            try {
+                const response = await fetch('/api/reformat_time', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename: selectedFileForReformat,
+                        convertTimezone: convertTimezone,
+                        targetTimezone: targetTimezone, // Send null if not converting
+                        keepTimeOnly: keepTimeOnly
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || `Reformatting failed with status: ${response.status}`);
+                }
+
+                showStatus(reformatStatusDiv, `Reformatting successful! New file created: ${result.reformattedFilename}`, 'success');
+                fetchFiles(); // Refresh file list to show the new file
+                // Reset selection and options after success?
+                // fileSelectForReformat.value = '';
+                // selectedFileForReformat = null;
+                // reformatConvertTzCheckbox.checked = false;
+                // reformatKeepTimeOnlyCheckbox.checked = false;
+                // reformatTargetTzInput.value = '';
+                // reformatTzInputDiv.style.display = 'none';
+
+            } catch (error) {
+                console.error('Reformat error:', error);
+                showStatus(reformatStatusDiv, `Reformatting failed: ${error.message}`, 'error');
+            } finally {
+                // Re-enable button only if a file is still selected
+                executeReformatButton.disabled = !selectedFileForReformat;
+            }
+        }
+
+
+    </script>
+    <!-- <script src="{{ url_for('static', filename='js/app.js') }}"></script> -->
+</body>
+</html>

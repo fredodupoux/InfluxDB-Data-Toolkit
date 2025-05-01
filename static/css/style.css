@@ -1,0 +1,307 @@
+/* Basic styling for the InfluxDB Toolkit Web UI */
+
+body {
+    font-family: sans-serif;
+    margin: 20px;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+h1, h2 {
+    color: #005C99; /* A shade of blue */
+}
+
+#app {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+/* Form Styling */
+.form-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.form-section h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    font-size: 1.2em;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="number"],
+input[type="text"] {
+    width: calc(100% - 22px); /* Adjust for padding/border */
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+button {
+    background-color: #007BFF; /* Primary button blue */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* File List Styling */
+#file-list-section {
+     margin-top: 20px;
+}
+
+#file-list {
+    list-style: none;
+    padding: 0;
+}
+
+#file-list li {
+    background-color: #e9ecef;
+    margin-bottom: 5px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-family: monospace; /* Use monospace for filenames */
+}
+
+/* Status/Error Message Styling */
+.status-message {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.status-success {
+    background-color: #d4edda; /* Light green */
+    color: #155724; /* Dark green */
+    border: 1px solid #c3e6cb;
+}
+
+.status-error {
+    background-color: #f8d7da; /* Light red */
+    color: #721c24; /* Dark red */
+    border: 1px solid #f5c6cb;
+}
+
+.status-loading {
+    background-color: #e2e3e5; /* Light grey */
+    color: #383d41; /* Dark grey */
+    border: 1px solid #d6d8db;
+}
+
+/* Cleaning Section Styling */
+#clean-data-section {
+    margin-top: 20px;
+}
+
+#file-select-for-cleaning {
+    padding: 8px;
+    margin-bottom: 10px;
+    min-width: 200px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+#preview-area {
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px dashed #ccc;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    min-height: 50px;
+}
+
+#preview-area h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+#preview-area table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+}
+
+#preview-area th, #preview-area td {
+    border: 1px solid #ddd;
+    padding: 6px;
+    text-align: left;
+}
+
+#preview-area th {
+    background-color: #e9ecef;
+}
+
+#operations-builder {
+    margin-top: 15px;
+}
+
+#operations-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+#operations-list li {
+    background-color: #f0f0f0;
+    padding: 8px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#operations-list li code {
+    font-family: monospace;
+    background-color: #e0e0e0;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+#operations-list button {
+    background-color: #dc3545; /* Red for remove */
+    font-size: 0.8em;
+    padding: 3px 8px;
+}
+
+#operations-list button:hover {
+    background-color: #c82333;
+}
+
+.operation-controls button {
+    margin-right: 5px;
+    background-color: #6c757d; /* Grey for add operations */
+}
+
+.operation-controls button:hover {
+    background-color: #5a6268;
+}
+
+#execute-clean-button {
+    background-color: #28a745; /* Green for execute */
+}
+
+#execute-clean-button:hover {
+    background-color: #218838;
+}
+
+/* Reformat Timestamp Section Styling */
+#reformat-time-section {
+    margin-top: 20px;
+}
+
+#file-select-for-reformat {
+    padding: 8px;
+    margin-bottom: 10px;
+    min-width: 200px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+#reformat-options label {
+    display: inline-block; /* Keep label next to checkbox */
+    margin-left: 5px;
+    font-weight: normal;
+}
+
+#reformat-options input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+#reformat-options div {
+    margin-bottom: 8px; /* Spacing between options */
+}
+
+#reformat-tz-input-div input[type="text"] {
+    width: calc(80% - 22px); /* Adjust width */
+    margin-left: 0; /* Align with checkbox */
+    margin-bottom: 5px;
+}
+
+#reformat-tz-input-div small {
+    display: block;
+    margin-left: 0; /* Align with input */
+    color: #666;
+    font-size: 0.85em;
+}
+
+#execute-reformat-button {
+    background-color: #ffc107; /* Amber/yellow for reformat */
+    color: #333;
+}
+
+#execute-reformat-button:hover {
+    background-color: #e0a800;
+}
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+    max-width: 500px;
+    border-radius: 5px;
+}
+
+.modal-content label,
+.modal-content input,
+.modal-content select {
+    display: block;
+    width: calc(100% - 22px);
+    margin-bottom: 10px;
+}
+
+.modal-content button {
+    margin-right: 10px;
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}

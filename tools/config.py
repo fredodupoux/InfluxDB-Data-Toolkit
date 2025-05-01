@@ -88,3 +88,34 @@ def load_influxdb_config():
     
     input("\nPress Enter to continue...")
     return config
+
+def load_influxdb_config_from_file():
+    """
+    Load InfluxDB configuration strictly from the config file.
+
+    Returns:
+    --------
+    dict
+        Dictionary containing InfluxDB configuration.
+    
+    Raises:
+    -------
+    FileNotFoundError
+        If the configuration file does not exist.
+    Exception
+        If there is an error parsing the JSON file.
+    """
+    if not os.path.exists(CONFIG_FILE):
+        raise FileNotFoundError(f"Configuration file not found: {CONFIG_FILE}")
+    
+    try:
+        with open(CONFIG_FILE, 'r') as f:
+            config = json.load(f)
+            # Basic validation (optional but recommended)
+            if not all(k in config for k in ['url', 'token', 'org', 'bucket']):
+                 raise ValueError("Config file is missing required keys (url, token, org, bucket)")
+            return config
+    except json.JSONDecodeError as e:
+        raise Exception(f"Error decoding JSON from {CONFIG_FILE}: {e}")
+    except Exception as e:
+        raise Exception(f"Error loading configuration file: {str(e)}")
