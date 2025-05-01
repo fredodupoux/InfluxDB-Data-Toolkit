@@ -23,6 +23,7 @@
             <li><button id="nav-open-file-btn" class="nav-button"><span class="material-icons nav-icon">folder_open</span> Open File</button></li>
             <li><button id="nav-clean-btn" class="nav-button" disabled><span class="material-icons nav-icon">cleaning_services</span> Clean Data</button></li>
             <li><button id="nav-reformat-btn" class="nav-button" disabled><span class="material-icons nav-icon">schedule</span> Reformat Time</button></li>
+            <li><button id="nav-config-btn" class="nav-button"><span class="material-icons nav-icon">settings</span> Configuration</button></li>
         </ul>
     </nav>
 
@@ -163,6 +164,28 @@
             <button id="confirm-rename-col">Add Operation</button>
             <button onclick="closeModal('rename-col-modal')">Cancel</button>
         </div>
+    </div>
+
+    <!-- Configuration Management Modal -->
+    <div id="config-modal" class="modal">
+      <div class="modal-content config-modal-content">
+        <span class="close-button" id="close-config-modal">&times;</span>
+        <h3>Configuration Management</h3>
+        <div style="margin-bottom: 12px;">
+          <label for="config-select">Select Config File:</label>
+          <select id="config-select">
+            <option value="influxdb">InfluxDB Config</option>
+            <option value="rules">Water Event Rules</option>
+          </select>
+          <button id="reload-config-btn" title="Reload"><span class="material-icons">refresh</span></button>
+        </div>
+        <textarea id="config-editor" rows="18" style="width:100%; font-family:monospace; font-size:1em; border-radius:6px; border:1px solid #ccc; padding:10px;"></textarea>
+        <div id="config-status" class="status-message" style="display:none;"></div>
+        <div style="margin-top:10px; text-align:right;">
+          <button id="save-config-btn"><span class="material-icons" style="vertical-align:middle;">save</span> Save</button>
+          <button id="cancel-config-btn">Cancel</button>
+        </div>
+      </div>
     </div>
 
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>

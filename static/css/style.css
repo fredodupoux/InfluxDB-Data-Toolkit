@@ -479,3 +479,80 @@ button:hover:not(:disabled) {
     text-decoration: none;
     cursor: pointer;
 }
+
+.config-modal-content {
+    max-width: 700px;
+    width: 95%;
+    min-width: 320px;
+    font-size: 1em;
+}
+
+#config-editor {
+    min-height: 320px;
+    resize: vertical;
+    background: #f9f9f9;
+    border: 1.5px solid #eebf63;
+    font-family: 'Fira Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+    color: #232946;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+#config-status {
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+#reload-config-btn {
+    background: #f4f7fa;
+    color: #232946;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 6px 10px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+#reload-config-btn:hover {
+    background: #eebf63;
+    color: #232946;
+    border-color: #eebf63;
+}
+
+/* Global Toast Notification Styling */
+.global-toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 220px;
+    max-width: 90vw;
+    background: #232946;
+    color: #fff;
+    padding: 16px 32px;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: 500;
+    z-index: 9999;
+    box-shadow: 0 4px 16px rgba(35,41,70,0.18);
+    display: none;
+    text-align: center;
+    opacity: 0.98;
+    pointer-events: none;
+}
+
+.toast-error {
+    background: #b00020;
+    color: #fff;
+}
+
+.toast-success {
+    background: #1a7f37;
+    color: #fff;
+}
+
+.toast-info {
+    background: #232946;
+    color: #fff;
+}

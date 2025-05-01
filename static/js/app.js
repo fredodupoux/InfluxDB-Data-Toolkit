@@ -571,3 +571,125 @@ async function handleReformatSubmit() {
          // Button state is handled by fetchFiles/fetchAndDisplayPreview if successful
     }
 }
+
+// === Configuration Management ===
+const configModal = document.getElementById('config-modal');
+const configBtn = document.getElementById('nav-config-btn');
+const closeConfigBtn = document.getElementById('close-config-modal');
+const cancelConfigBtn = document.getElementById('cancel-config-btn');
+const saveConfigBtn = document.getElementById('save-config-btn');
+const reloadConfigBtn = document.getElementById('reload-config-btn');
+const configSelect = document.getElementById('config-select');
+const configEditor = document.getElementById('config-editor');
+const configStatus = document.getElementById('config-status');
+
+function showConfigModal() {
+  configModal.style.display = 'block';
+  loadConfigFile();
+}
+function hideConfigModal() {
+  configModal.style.display = 'none';
+  configStatus.style.display = 'none';
+}
+configBtn.addEventListener('click', showConfigModal);
+closeConfigBtn.addEventListener('click', hideConfigModal);
+cancelConfigBtn.addEventListener('click', hideConfigModal);
+window.addEventListener('click', function(event) {
+  if (event.target === configModal) hideConfigModal();
+});
+configSelect.addEventListener('change', loadConfigFile);
+reloadConfigBtn.addEventListener('click', loadConfigFile);
+
+function loadConfigFile() {
+  const name = configSelect.value;
+  configStatus.style.display = 'none';
+  configEditor.value = '';
+  fetch(`/api/config/${name}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        configStatus.textContent = data.error;
+        configStatus.className = 'status-message status-error';
+        configStatus.style.display = '';
+      } else {
+        configEditor.value = JSON.stringify(data, null, 2);
+      }
+    })
+    .catch(err => {
+      configStatus.textContent = 'Failed to load config: ' + err;
+      configStatus.className = 'status-message status-error';
+      configStatus.style.display = '';
+    });
+}
+
+saveConfigBtn.addEventListener('click', function() {
+  const name = configSelect.value;
+  let json;
+  try {
+    json = JSON.parse(configEditor.value);
+  } catch (e) {
+    configStatus.textContent = 'Invalid JSON: ' + e.message;
+    configStatus.className = 'status-message status-error';
+    configStatus.style.display = '';
+    return;
+  }
+  configStatus.textContent = 'Saving...';
+  configStatus.className = 'status-message status-loading';
+  configStatus.style.display = '';
+  fetch(`/api/config/${name}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(json)
+  })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        configStatus.textContent = data.error;
+        configStatus.className = 'status-message status-error';
+      } else {
+        configStatus.textContent = data.message || 'Saved!';
+        configStatus.className = 'status-message status-success';
+      }
+      configStatus.style.display = '';
+    })
+    .catch(err => {
+      configStatus.textContent = 'Failed to save config: ' + err;
+      configStatus.className = 'status-message status-error';
+      configStatus.style.display = '';
+    });
+});
+
+// === Global Toast Notification System ===
+function showToast(message, type = 'info', duration = 4000) {
+    let toast = document.getElementById('global-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'global-toast';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.className = `global-toast toast-${type}`;
+    toast.style.display = 'block';
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, duration);
+}
+
+// Patch fetch to show toast on network/server errors globally
+const originalFetch = window.fetch;
+window.fetch = function(...args) {
+    return originalFetch(...args).then(async response => {
+        if (!response.ok) {
+            let msg = `Error: ${response.status}`;
+            try {
+                const data = await response.clone().json();
+                if (data && data.error) msg = data.error;
+            } catch {}
+            showToast(msg, 'error');
+        }
+        return response;
+    }).catch(err => {
+        showToast('Network error: ' + err, 'error');
+        throw err;
+    });
+};

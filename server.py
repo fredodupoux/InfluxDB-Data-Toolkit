@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, abort
 # Import necessary functions from your tools
 # Removed unused import
 from tools.exporter import export_data_from_influxdb
@@ -8,6 +8,9 @@ from tools.time_utils import reformat_timestamps_api # Import the timestamp refo
 import datetime # Needed for exporter timestamp
 import pandas as pd # Needed for reading CSVs
 import pytz # Needed for timezone validation
+import json
+from functools import wraps
+from flask import Response
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
@@ -15,6 +18,37 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 DATA_DIR = os.path.join(os.path.dirname(__file__), '_data')
 if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR)
+
+# Allowed config files for editing
+ALLOWED_CONFIGS = {
+    'influxdb': os.path.join('config', 'influxdb_config.json'),
+    'rules': os.path.join('config', 'water_event_rules.json')
+}
+
+# --- Basic Auth for config endpoints (optional, can be disabled) ---
+CONFIG_AUTH_ENABLED = True
+CONFIG_AUTH_USER = os.environ.get('CONFIG_AUTH_USER', 'admin')
+CONFIG_AUTH_PASS = os.environ.get('CONFIG_AUTH_PASS', 'changeme')
+
+def check_auth(username, password):
+    return username == CONFIG_AUTH_USER and password == CONFIG_AUTH_PASS
+
+def authenticate():
+    return Response(
+        'Authentication required', 401,
+        {'WWW-Authenticate': 'Basic realm="Config Management"'}
+    )
+
+def requires_config_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not CONFIG_AUTH_ENABLED:
+            return f(*args, **kwargs)
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
 
 @app.route('/')
 def index():
@@ -84,12 +118,13 @@ def handle_preview():
     """Provides a preview of a selected CSV file."""
     try:
         data = request.get_json()
-        filename = data.get('filename')
-        if not filename:
-            return jsonify({"error": "Missing 'filename' in request body."}), 400
+        # Sanitize filename
+        filename = os.path.basename(data.get('filename', ''))
+        if not filename or filename not in os.listdir(DATA_DIR):
+            return jsonify({"error": "Invalid or missing filename."}), 400
 
         # Construct the full path safely
-        file_path = os.path.join(DATA_DIR, os.path.basename(filename)) # Use basename to prevent path traversal
+        file_path = os.path.join(DATA_DIR, filename) # Use basename to prevent path traversal
 
         if not os.path.exists(file_path) or not file_path.startswith(DATA_DIR):
              return jsonify({"error": f"File not found or invalid path: {filename}"}), 404
@@ -117,14 +152,15 @@ def handle_clean():
     """Applies cleaning operations to a specified CSV file."""
     try:
         data = request.get_json()
-        filename = data.get('filename')
+        # Sanitize filename
+        filename = os.path.basename(data.get('filename', ''))
         operations = data.get('operations')
 
-        if not filename or not isinstance(operations, list):
+        if not filename or filename not in os.listdir(DATA_DIR) or not isinstance(operations, list):
             return jsonify({"error": "Missing 'filename' or invalid 'operations' list in request body."}), 400
 
         # Construct the full path safely
-        file_path = os.path.join(DATA_DIR, os.path.basename(filename))
+        file_path = os.path.join(DATA_DIR, filename)
 
         if not os.path.exists(file_path) or not file_path.startswith(DATA_DIR):
              return jsonify({"error": f"File not found or invalid path: {filename}"}), 404
@@ -171,13 +207,14 @@ def handle_reformat_time():
     """Handles timestamp reformatting requests."""
     try:
         data = request.get_json()
-        filename = data.get('filename')
+        # Sanitize filename
+        filename = os.path.basename(data.get('filename', ''))
         target_timezone = data.get('targetTimezone', 'America/New_York') # Default timezone
         convert_timezone = data.get('convertTimezone', False)
         keep_time_only = data.get('keepTimeOnly', False)
 
-        if not filename:
-            return jsonify({"error": "Missing 'filename' in request body."}), 400
+        if not filename or filename not in os.listdir(DATA_DIR):
+            return jsonify({"error": "Invalid or missing filename."}), 400
         if not isinstance(convert_timezone, bool):
              return jsonify({"error": "'convertTimezone' must be a boolean."}), 400
         if not isinstance(keep_time_only, bool):
@@ -189,7 +226,7 @@ def handle_reformat_time():
                  return jsonify({"error": f"Invalid target timezone specified: {target_timezone}"}), 400
 
         # Construct the full path safely
-        file_path = os.path.join(DATA_DIR, os.path.basename(filename)) # Use basename to prevent path traversal
+        file_path = os.path.join(DATA_DIR, filename) # Use basename to prevent path traversal
 
         if not os.path.exists(file_path) or not file_path.startswith(DATA_DIR):
              return jsonify({"error": f"File not found or invalid path: {filename}"}), 404
@@ -219,6 +256,45 @@ def handle_reformat_time():
         print(f"Reformat Error: An unexpected error occurred - {e}")
         return jsonify({"error": f"An unexpected error occurred during timestamp reformatting: {e}"}), 500
 
+@app.route('/api/config/<name>', methods=['GET'])
+@requires_config_auth
+def get_config(name):
+    """Return the contents of a config file (influxdb or rules) as JSON."""
+    if name not in ALLOWED_CONFIGS:
+        abort(404)
+    path = ALLOWED_CONFIGS[name]
+    if not os.path.exists(path):
+        return jsonify({"error": f"Config file '{name}' not found."}), 404
+    try:
+        with open(path, 'r') as f:
+            data = json.load(f)
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": f"Failed to read config: {str(e)}"}), 500
+
+@app.route('/api/config/<name>', methods=['POST'])
+@requires_config_auth
+def save_config(name):
+    """Save new contents to a config file (influxdb or rules)."""
+    if name not in ALLOWED_CONFIGS:
+        abort(404)
+    path = ALLOWED_CONFIGS[name]
+    try:
+        data = request.get_json(force=True)
+        # Validate JSON (must be dict or list)
+        if not isinstance(data, (dict, list)):
+            return jsonify({"error": "Config must be a JSON object or array."}), 400
+        # Extra validation for influxdb config
+        if name == 'influxdb':
+            required_keys = {'url', 'token', 'org', 'bucket'}
+            if not isinstance(data, dict) or not required_keys.issubset(data.keys()):
+                return jsonify({"error": "InfluxDB config must include url, token, org, and bucket."}), 400
+        # Optionally: add more validation for influxdb config keys
+        with open(path, 'w') as f:
+            json.dump(data, f, indent=2)
+        return jsonify({"message": f"Config '{name}' saved successfully."})
+    except Exception as e:
+        return jsonify({"error": f"Failed to save config: {str(e)}"}), 500
 
 # Add more endpoints here later for clean, reformat, etc.
 
